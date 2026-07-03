@@ -717,6 +717,78 @@ export const TASKS: Task[] = [
       "Caffeine is a purine alkaloid — a nitrogen-rich stimulant based on the fused purine ring system.",
     toolHref: "/molecules",
   },
+  {
+    id: "org-tollens",
+    title: "Distinguish aldehyde from ketone",
+    topic: "Organic",
+    difficulty: "Core",
+    objectives: ["Choose a test that separates aldehydes from ketones"],
+    prompt:
+      "Which reagent gives a silver mirror with an aldehyde but no reaction with a ketone?",
+    answer: {
+      kind: "choice",
+      options: ["Tollens' reagent", "2,4-DNPH", "Bromine water", "Neutral FeCl₃"],
+      correctIndex: 0,
+    },
+    hints: [
+      "Both aldehydes and ketones react with 2,4-DNPH, so that can't tell them apart.",
+      "Only aldehydes are reducing agents — they reduce Ag⁺ to a silver mirror.",
+    ],
+    solution:
+      "Tollens' reagent (ammoniacal AgNO₃) is reduced by aldehydes to a silver mirror; ketones don't react.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "org-bromine-test",
+    title: "Test for a C=C double bond",
+    topic: "Organic",
+    difficulty: "Intro",
+    objectives: ["Identify the qualitative test for unsaturation"],
+    prompt: "What do you observe when bromine water is added to an alkene?",
+    answer: {
+      kind: "choice",
+      options: [
+        "Orange colour disappears",
+        "Orange precipitate forms",
+        "Silver mirror forms",
+        "Violet colour appears",
+      ],
+      correctIndex: 0,
+    },
+    hints: [
+      "Bromine adds across the C=C double bond.",
+      "The orange Br₂ is consumed.",
+    ],
+    solution:
+      "An alkene decolourises bromine water (orange → colourless) as Br₂ adds across the double bond.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "org-carboxylic-test",
+    title: "Identify a carboxylic acid",
+    topic: "Organic",
+    difficulty: "Core",
+    objectives: ["Use a gas-evolution test for carboxylic acids"],
+    prompt:
+      "Which reagent fizzes (releases CO₂) with a carboxylic acid but not with an alcohol or phenol?",
+    answer: {
+      kind: "choice",
+      options: [
+        "Sodium hydrogencarbonate (NaHCO₃)",
+        "Tollens' reagent",
+        "2,4-DNPH",
+        "Bromine water",
+      ],
+      correctIndex: 0,
+    },
+    hints: [
+      "Only a strong enough acid protonates hydrogencarbonate.",
+      "Alcohols and phenols are not acidic enough to release CO₂.",
+    ],
+    solution:
+      "Carboxylic acids react with NaHCO₃ to give effervescence (CO₂); alcohols and phenols do not.",
+    toolHref: "/reactions",
+  },
 ];
 
 export const TASK_TOPICS: TaskTopic[] = [

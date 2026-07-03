@@ -1,8 +1,11 @@
+import { cn } from "@/lib/utils";
+import { renderCe } from "./renderCe";
+
 /**
- * Renders a chemical formula with proper subscripts and (optional) an ionic
- * charge superscript (§3.3 chem layer). Digit runs become <sub> (H2O → H₂O);
- * a non-zero `charge` becomes a superscript (SO4 + −2 → SO₄²⁻). A lightweight
- * stand-in for the planned KaTeX/mhchem <ChemFormula>.
+ * Renders a chemical formula with proper subscripts and an optional ionic charge
+ * superscript (§3.3), typeset with KaTeX + mhchem (`\ce{…}`). Handles nested
+ * groups, charges, and isotopes correctly. `role="img"` + a plain-language
+ * `aria-label` means a screen reader hears "sulfate 2 minus", not glyph soup.
  */
 interface FormulaTextProps {
   formula: string;
@@ -10,25 +13,27 @@ interface FormulaTextProps {
   className?: string;
 }
 
+function toCe(formula: string, charge?: number): string {
+  let body = formula;
+  if (charge != null && charge !== 0) {
+    const mag = Math.abs(charge) === 1 ? "" : String(Math.abs(charge));
+    body += `^{${mag}${charge > 0 ? "+" : "-"}}`;
+  }
+  return `\\ce{${body}}`;
+}
+
 export function FormulaText({ formula, charge, className }: FormulaTextProps) {
-  const tokens = formula.match(/\d+|[^\d]+/g) ?? [];
+  const html = renderCe(toCe(formula, charge));
+  const label =
+    charge != null && charge !== 0
+      ? `${formula} ${Math.abs(charge)}${charge > 0 ? " plus" : " minus"}`
+      : formula;
   return (
-    <span className={className}>
-      {tokens.map((token, i) =>
-        /^\d+$/.test(token) ? (
-          <sub key={i} className="text-[0.7em]">
-            {token}
-          </sub>
-        ) : (
-          <span key={i}>{token}</span>
-        ),
-      )}
-      {charge != null && charge !== 0 && (
-        <sup className="text-[0.7em]">
-          {Math.abs(charge) > 1 ? Math.abs(charge) : ""}
-          {charge > 0 ? "+" : "−"}
-        </sup>
-      )}
-    </span>
+    <span
+      role="img"
+      aria-label={label}
+      className={cn("inline-block align-middle", className)}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
   );
 }

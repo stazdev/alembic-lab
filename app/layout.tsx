@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Manrope } from "next/font/google";
 import "./globals.css";
+import "katex/dist/katex.min.css";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { TopBar } from "@/components/shell/TopBar";
 

@@ -12,6 +12,7 @@ import { ThermoTool } from "./ThermoTool";
 import { ElectrochemistryTool } from "./ElectrochemistryTool";
 import { KineticsTool } from "./KineticsTool";
 import { EnzymeKineticsTool } from "./EnzymeKineticsTool";
+import { FunctionalGroupsTool } from "./FunctionalGroupsTool";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +27,8 @@ type ToolId =
   | "thermo"
   | "echem"
   | "kinetics"
-  | "enzyme";
+  | "enzyme"
+  | "functionalGroups";
 
 const TOOL_COMPONENTS: Record<ToolId, ReactNode> = {
   balancer: <EquationBalancer />,
@@ -40,6 +42,7 @@ const TOOL_COMPONENTS: Record<ToolId, ReactNode> = {
   echem: <ElectrochemistryTool />,
   kinetics: <KineticsTool />,
   enzyme: <EnzymeKineticsTool />,
+  functionalGroups: <FunctionalGroupsTool />,
 };
 
 interface Category {
@@ -91,6 +94,11 @@ const CATEGORIES: Category[] = [
       { value: "kinetics", label: "Rate laws" },
       { value: "enzyme", label: "Enzymes" },
     ],
+  },
+  {
+    id: "organic",
+    label: "Organic",
+    tools: [{ value: "functionalGroups", label: "Functional-group tests" }],
   },
 ];
 
