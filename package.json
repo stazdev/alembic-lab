@@ -27,6 +27,7 @@
     "kekule": "^1.0.4",
     "lucide-react": "^1.23.0",
     "next": "^16.2.10",
+    "openchemlib": "^9.24.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "tailwind-merge": "^3.6.0",

@@ -256,18 +256,27 @@ Python-emitted `expected_outcomes.json` before deleting the old ruleset.
 
 ---
 
-## 7. Improvement 2 — In-Browser Property Prediction
+## 7. Improvement 2 — In-Browser Property Prediction — ✅ SHIPPED (v1)
 
-**Revised from v1: mostly no training needed.** Add **`openchemlib`** and surface a
-`components/chem/PropertyCard.tsx` (logP, logS/aqueous solubility, TPSA, H-bond donors/acceptors,
-rotatable bonds, druglikeness, toxicity risks) computed **client-side, instantly, with no model
-download**. Mount it in the Molecules explorer, the Kekulé round-trip panel (§12), and compound cards.
+**Revised from v1: no training needed.** Added **`openchemlib` 9.24.0** (BSD-3, pure JS) and shipped
+`components/chem/PropertyCard.tsx`, mounted in the Molecules explorer. It estimates — **client-side,
+instantly, no model download** — molar mass, **logP**, **aqueous solubility (log S)** with a
+qualitative band, **TPSA**, **H-bond donors/acceptors**, **rotatable bonds**, and a deterministic
+**Lipinski Rule-of-5** pass/fail computed from those values. Every value carries an *"estimated"*
+badge with an explanatory tooltip. Verified against literature (aspirin logP 1.13 vs lit 1.19, etc.);
+111 tests pass including a `predictProperties` suite exercising the real OCL API and invalid-SMILES
+handling.
 
-- Refactor the RDKit.js loader out of `StructureDiagram.tsx` into `lib/chem/rdkit.ts` so diagrams and any future descriptor use share one instance.
-- **pKa is the one gap** openchemlib-js doesn't fill → the sole justified custom ONNX model: train in `pipelines/train_pka.py` on OPERA/IUPAC pKa sets, export int8 ONNX (~0.5 MB), run via `onnxruntime-web`. Freeze the descriptor list in `models/feature_spec.json`; a CI parity test asserts Python-RDKit and RDKit.js compute identical features on 100 reference SMILES.
-- **Solubility bridge to the bench:** openchemlib-js logS gives a "will it dissolve?" hint when a solid reagent is added — badged as an estimate; the curated `solubility.json` value wins when present.
+- **`lib/chem/openchemlib.ts`** — lazy singleton loader (`import("openchemlib")`, dual ESM/UMD interop guard) + `predictProperties(smiles)`; the ~1 MB lib never touches the initial bundle.
+- **Toxicity DELIBERATELY EXCLUDED.** OCL's `ToxicityPredictor` returned chemically nonsensical output in validation (water "high mutagenicity", ethanol "high" on all axes, aflatoxin "low") — surfacing it would violate the #1 UI rule. Druglikeness was also skipped for v1 because it needs a 1.35 MB `resources.json` registration for a single score.
 
-Every value is badged *"estimated"*. **Effort:** ~1 week (property card) + ~1 week (pKa model).
+**Follow-ups (not blocking):**
+- **pKa** is the one useful gap OCL doesn't fill → the sole justified custom ONNX model (train `pipelines/train_pka.py` on OPERA/IUPAC sets, int8 ~0.5 MB, run via `onnxruntime-web`; 100-SMILES RDKit parity test in CI).
+- Show the card for **PubChem-searched** compounds too (resolve SMILES via the proxy — today it shows only for library molecules, which all carry SMILES).
+- **Solubility bridge to the bench:** feed log S into a "will it dissolve?" hint when a solid reagent is added (curated `solubility.json` wins where present).
+- Refactor the RDKit.js loader out of `StructureDiagram.tsx` into `lib/chem/rdkit.ts` to share one instance.
+
+**Effort spent:** ~½ day. Remaining pKa model: ~1 week.
 
 ---
 

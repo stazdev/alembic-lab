@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { MOLECULE_LIBRARY } from "@/data/moleculeLibrary";
 import { FormulaText } from "@/components/chem/FormulaText";
+import { PropertyCard } from "@/components/chem/PropertyCard";
 import { SearchField } from "@/components/ui/SearchField";
 import { cn } from "@/lib/utils";
 import { MoleculeViewer } from "./MoleculeViewer";
@@ -95,6 +96,11 @@ export function MoleculesExplorer() {
           cid={active.cid}
           smiles={active.smiles}
         />
+        {active.smiles && (
+          <div className="mt-3">
+            <PropertyCard smiles={active.smiles} />
+          </div>
+        )}
       </div>
     </div>
   );
