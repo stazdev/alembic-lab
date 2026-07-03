@@ -1,6 +1,7 @@
 import { EquationBalancer } from "@/components/features/reactions/EquationBalancer";
 import { StoichiometryTool } from "@/components/features/reactions/StoichiometryTool";
 import { PHTool } from "@/components/features/reactions/PHTool";
+import { ThermoTool } from "@/components/features/reactions/ThermoTool";
 import { UpcomingTools } from "@/components/features/reactions/UpcomingTools";
 
 export default function ReactionsPage() {
@@ -30,6 +31,10 @@ export default function ReactionsPage() {
 
       <div className="mt-8">
         <PHTool />
+      </div>
+
+      <div className="mt-8">
+        <ThermoTool />
       </div>
 
       <div className="mt-8">

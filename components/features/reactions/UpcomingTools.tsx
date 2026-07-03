@@ -1,13 +1,8 @@
-import { Activity, Flame } from "lucide-react";
+import { Activity } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 
 const TOOLS = [
-  {
-    name: "Thermodynamics",
-    desc: "ΔH, ΔG, calorimetry, spontaneity via Hess's law",
-    icon: Flame,
-  },
   {
     name: "Kinetics",
     desc: "Rate laws, Arrhenius, half-life & integrated rates",
