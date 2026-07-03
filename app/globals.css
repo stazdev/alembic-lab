@@ -76,11 +76,22 @@ body {
   background-clip: content-box;
 }
 
-/* On-brand focus ring for keyboard users */
+/* On-brand focus ring for keyboard users (buttons, links, etc.) */
 :focus-visible {
   outline: 2px solid var(--color-accent-strong);
   outline-offset: 2px;
   border-radius: 4px;
+}
+
+/* Text fields indicate focus with a thin border (styled per component), not
+   the offset ring — suppress the outline on form controls. */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none;
 }
 
 /* Entrance animation for popovers / tooltips (Radix content). */

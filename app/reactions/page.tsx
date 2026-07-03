@@ -1,4 +1,5 @@
 import { EquationBalancer } from "@/components/features/reactions/EquationBalancer";
+import { StoichiometryTool } from "@/components/features/reactions/StoichiometryTool";
 import { UpcomingTools } from "@/components/features/reactions/UpcomingTools";
 
 export default function ReactionsPage() {
@@ -20,6 +21,10 @@ export default function ReactionsPage() {
 
       <div className="mt-8">
         <EquationBalancer />
+      </div>
+
+      <div className="mt-8">
+        <StoichiometryTool />
       </div>
 
       <div className="mt-8">

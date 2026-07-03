@@ -19,7 +19,7 @@ export function SearchField({
   return (
     <div
       className={cn(
-        "flex h-11 items-center gap-2.5 rounded-pill border border-line bg-surface px-4 transition focus-within:border-line-strong focus-within:shadow-soft",
+        "flex h-11 items-center gap-2.5 rounded-pill border border-line bg-surface px-4 transition focus-within:border-ink-2 focus-within:shadow-soft",
         className,
       )}
     >

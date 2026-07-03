@@ -110,7 +110,7 @@ function AddSpecies({
 
   return (
     <form onSubmit={submit} className="flex flex-col gap-1">
-      <div className="flex h-12 items-center gap-1 rounded-ctrl border border-dashed border-line-strong bg-surface px-2">
+      <div className="flex h-12 items-center gap-1 rounded-ctrl border border-dashed border-line-strong bg-surface px-2 transition focus-within:border-ink-2">
         <input
           value={value}
           onChange={(e) => {
