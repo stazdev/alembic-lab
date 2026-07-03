@@ -7,7 +7,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.18",
@@ -31,6 +33,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.185.0",
     "tailwindcss": "^4.3.2",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.9"
   }
 }
