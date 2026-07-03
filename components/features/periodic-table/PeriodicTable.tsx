@@ -212,7 +212,7 @@ export function PeriodicTable() {
     <div>
       {/* Controls: color mode + search */}
       <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex flex-wrap items-center gap-1.5">
+        <div data-tour="ptable-colorby" className="flex flex-wrap items-center gap-1.5">
           <span className="mr-1 text-xs font-medium text-ink-2">Color by</span>
           <ColorByPill
             active={colorBy === "category"}
@@ -230,16 +230,18 @@ export function PeriodicTable() {
             </ColorByPill>
           ))}
         </div>
-        <SearchField
-          value={query}
-          onChange={setQuery}
-          placeholder="Search element…"
-          className="lg:w-64"
-        />
+        <div data-tour="ptable-search">
+          <SearchField
+            value={query}
+            onChange={setQuery}
+            placeholder="Search element…"
+            className="lg:w-64"
+          />
+        </div>
       </div>
 
       {/* Grid */}
-      <div className="overflow-x-auto pb-2">
+      <div data-tour="ptable-grid" className="overflow-x-auto pb-2">
         <div
           role="group"
           aria-label="Periodic table of the elements"
@@ -280,7 +282,7 @@ export function PeriodicTable() {
       </div>
 
       {/* Legend: category swatches or the heatmap scale */}
-      <div className="mt-6">
+      <div data-tour="ptable-legend" className="mt-6">
         {activeProp ? (
           <HeatmapLegend
             label={activeProp.label}

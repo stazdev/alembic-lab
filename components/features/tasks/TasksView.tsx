@@ -30,7 +30,7 @@ export function TasksView() {
   return (
     <div>
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <div data-tour="tasks-filter" className="-mx-1 overflow-x-auto px-1 pb-1">
           <SegmentedControl
             layoutId="tasks-topic"
             aria-label="Filter tasks by topic"
@@ -46,7 +46,7 @@ export function TasksView() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[320px_1fr]">
-        <div className="space-y-2">
+        <div data-tour="tasks-list" className="space-y-2">
           {filtered.map((t) => (
             <TaskCard
               key={t.id}
@@ -56,9 +56,11 @@ export function TasksView() {
             />
           ))}
         </div>
-        <Card className="p-5 lg:p-6">
-          <TaskDetail key={selected.id} task={selected} />
-        </Card>
+        <div data-tour="tasks-detail">
+          <Card className="p-5 lg:p-6">
+            <TaskDetail key={selected.id} task={selected} />
+          </Card>
+        </div>
       </div>
     </div>
   );

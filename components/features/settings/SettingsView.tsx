@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { RotateCcw, Trash2 } from "lucide-react";
+import { RotateCcw, Sparkles, Trash2 } from "lucide-react";
 import { usePrefs } from "@/lib/stores/prefsStore";
 import { useTasks } from "@/lib/stores/tasksStore";
+import { useTour } from "@/lib/stores/tourStore";
 import { TASKS } from "@/data/tasks";
 import { ELEMENTS } from "@/data/elements";
 import { REAGENTS } from "@/lib/chemistry/reagents";
@@ -130,13 +131,17 @@ export function SettingsView() {
   const setTitle = usePrefs((s) => s.setTitle);
   const completed = useTasks((s) => s.completed);
   const resetTasks = useTasks((s) => s.reset);
+  const toursSeen = useTour((s) => s.seen);
+  const resetTours = useTour((s) => s.resetSeen);
   const [confirmTasks, setConfirmTasks] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
 
   const done = mounted ? completed.length : 0;
+  const seenTours = mounted ? toursSeen.length : 0;
 
   function clearAll() {
     resetTasks();
+    resetTours();
     setDisplayName("");
     setTitle("");
     setReduceMotion(false);
@@ -167,6 +172,19 @@ export function SettingsView() {
               onChange={setReduceMotion}
               label="Reduce motion"
             />
+          </Row>
+          <Row
+            title="Page walkthroughs"
+            desc="Replay the first-time guided tours — they'll run again on each page you visit."
+          >
+            <button
+              type="button"
+              onClick={resetTours}
+              disabled={seenTours === 0}
+              className="inline-flex items-center gap-1 rounded-pill border border-line px-3 py-1.5 text-xs font-medium text-ink-2 transition hover:text-ink disabled:pointer-events-none disabled:opacity-40"
+            >
+              <Sparkles className="h-3.5 w-3.5" /> Replay
+            </button>
           </Row>
         </div>
         <p className="mt-2 text-[11px] text-ink-3">

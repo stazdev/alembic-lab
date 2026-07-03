@@ -4,9 +4,11 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Bell, Settings, User } from "lucide-react";
+import { Bell, HelpCircle, Settings, User } from "lucide-react";
 import { ApparatusIcon } from "@/components/chem/ApparatusIcon";
 import { NotificationsDrawer } from "./NotificationsDrawer";
+import { useTour } from "@/lib/stores/tourStore";
+import { tourForPath } from "@/lib/tour/tours";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -21,6 +23,8 @@ const NAV = [
 export function TopBar() {
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
+  const startTour = useTour((s) => s.start);
+  const pageTour = tourForPath(pathname);
 
   return (
     <header className="flex items-center justify-between gap-4">
@@ -68,6 +72,16 @@ export function TopBar() {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        {pageTour && (
+          <button
+            type="button"
+            onClick={() => startTour(pageTour.id)}
+            aria-label="Replay the walkthrough for this page"
+            className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-pill border border-line bg-surface text-ink transition hover:bg-surface-2 active:scale-95"
+          >
+            <HelpCircle className="h-[18px] w-[18px]" />
+          </button>
+        )}
         <Link
           href="/settings"
           className="hidden items-center gap-2 rounded-pill border border-line bg-surface px-4 py-2 text-sm font-medium text-ink-2 transition hover:bg-surface-2 hover:text-ink sm:inline-flex"

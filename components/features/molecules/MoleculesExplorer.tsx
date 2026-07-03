@@ -36,6 +36,7 @@ export function MoleculesExplorer() {
             if (q) setActive({ name: q, label: q });
           }}
           className="mb-4"
+          data-tour="molecules-search"
         >
           <SearchField
             value={query}
@@ -44,7 +45,7 @@ export function MoleculesExplorer() {
           />
         </form>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div data-tour="molecules-library" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {MOLECULE_LIBRARY.map((m) => {
             const isActive = active.moleculeKey === m.key;
             return (
@@ -78,7 +79,7 @@ export function MoleculesExplorer() {
       </div>
 
       {/* Viewer */}
-      <div>
+      <div data-tour="molecules-viewer">
         <div className="mb-3">
           <div className="text-lg font-semibold text-ink">{active.label}</div>
           {active.formula && (

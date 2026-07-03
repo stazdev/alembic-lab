@@ -57,7 +57,7 @@ export function InventoryRoom() {
   return (
     <section aria-label="Apparatus inventory">
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div className="-mx-1 overflow-x-auto px-1 pb-1">
+        <div data-tour="inventory-filters" className="-mx-1 overflow-x-auto px-1 pb-1">
           <SegmentedControl
             layoutId="inventory-category"
             aria-label="Filter apparatus by category"
@@ -66,12 +66,14 @@ export function InventoryRoom() {
             onChange={setCategory}
           />
         </div>
-        <SearchField
-          value={query}
-          onChange={setQuery}
-          placeholder="Search apparatus…"
-          className="lg:w-72"
-        />
+        <div data-tour="inventory-search">
+          <SearchField
+            value={query}
+            onChange={setQuery}
+            placeholder="Search apparatus…"
+            className="lg:w-72"
+          />
+        </div>
       </div>
 
       <p className="mb-4 text-xs text-ink-2">
@@ -79,16 +81,18 @@ export function InventoryRoom() {
         {APPARATUS.length} apparatus
       </p>
 
-      {items.length > 0 ? (
-        <ApparatusGrid items={items} />
-      ) : (
-        <EmptyState
-          onReset={() => {
-            setQuery("");
-            setCategory("all");
-          }}
-        />
-      )}
+      <div data-tour="inventory-grid">
+        {items.length > 0 ? (
+          <ApparatusGrid items={items} />
+        ) : (
+          <EmptyState
+            onReset={() => {
+              setQuery("");
+              setCategory("all");
+            }}
+          />
+        )}
+      </div>
     </section>
   );
 }

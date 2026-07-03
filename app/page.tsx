@@ -8,7 +8,7 @@ export default function Home() {
       <PageHeader />
       <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_360px]">
         <InventoryRoom />
-        <aside className="lg:sticky lg:top-6 lg:self-start">
+        <aside data-tour="inventory-bench" className="lg:sticky lg:top-6 lg:self-start">
           <BenchTray />
         </aside>
       </div>
