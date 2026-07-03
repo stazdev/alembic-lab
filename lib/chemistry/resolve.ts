@@ -51,6 +51,7 @@ const CONC: Record<string, number> = {
   cuso4: 0.5, agno3: 0.5, nacl: 0.5, fecl3: 0.5,
   pb_no3: 0.5, ki: 0.5, bacl2: 0.5, cocl2: 0.5,
   kmno4: 0.1,
+  na: 2, ca: 2, mg: 2, zn: 2, fe: 2, cu: 2,
 };
 
 interface Reaction {
@@ -102,6 +103,54 @@ const REACTIONS: Reaction[] = [
     text: "The carbonate fizzes, releasing carbon dioxide.",
     kind: "gas",
     deltaHkJ: -15,
+    gas: true,
+  },
+  // ── Reactive metals (reactivity series) — H₂ evolution ──
+  {
+    id: "na-water",
+    reactants: [{ id: "na", coeff: 2 }, { id: "water", coeff: 2 }],
+    produces: [{ id: "naoh", coeff: 2 }],
+    equation: "2Na + 2H₂O → 2NaOH + H₂↑",
+    text: "Sodium skates across the surface, fizzing off hydrogen and turning the water strongly alkaline.",
+    kind: "gas",
+    deltaHkJ: -184,
+    gas: true,
+  },
+  {
+    id: "ca-water",
+    reactants: [{ id: "ca", coeff: 1 }, { id: "water", coeff: 2 }],
+    produces: [{ id: "naoh", coeff: 2 }],
+    equation: "Ca + 2H₂O → Ca(OH)₂ + H₂↑",
+    text: "Calcium bubbles steadily in the water, releasing hydrogen and forming an alkaline solution.",
+    kind: "gas",
+    deltaHkJ: -100,
+    gas: true,
+  },
+  {
+    id: "mg-hcl",
+    reactants: [{ id: "mg", coeff: 1 }, { id: "hcl", coeff: 2 }],
+    equation: "Mg + 2HCl → MgCl₂ + H₂↑",
+    text: "Magnesium fizzes vigorously in the acid, streaming off hydrogen.",
+    kind: "gas",
+    deltaHkJ: -150,
+    gas: true,
+  },
+  {
+    id: "zn-hcl",
+    reactants: [{ id: "zn", coeff: 1 }, { id: "hcl", coeff: 2 }],
+    equation: "Zn + 2HCl → ZnCl₂ + H₂↑",
+    text: "Zinc dissolves steadily in the acid, giving off hydrogen bubbles.",
+    kind: "gas",
+    deltaHkJ: -100,
+    gas: true,
+  },
+  {
+    id: "fe-hcl",
+    reactants: [{ id: "fe", coeff: 1 }, { id: "hcl", coeff: 2 }],
+    equation: "Fe + 2HCl → FeCl₂ + H₂↑",
+    text: "Iron reacts slowly with the acid, releasing hydrogen.",
+    kind: "gas",
+    deltaHkJ: -88,
     gas: true,
   },
   {
@@ -255,6 +304,15 @@ export function resolveMixture(
     observables.push({ id: rxn.id, text: rxn.text, kind: rxn.kind, equation: rxn.equation });
   }
 
+  // Reactivity-series teaching moment: copper can't displace H₂ from dilute acid.
+  if ((moles.cu ?? 0) > 1e-9 && ((moles.hcl ?? 0) > 1e-9 || (moles.h2so4 ?? 0) > 1e-9)) {
+    observables.push({
+      id: "cu-inert",
+      kind: "note",
+      text: "The copper is unreactive — it sits below hydrogen in the reactivity series, so it can't displace hydrogen from dilute acid.",
+    });
+  }
+
   const pH = computePH(moles, V);
 
   // ── colour ──
@@ -264,6 +322,7 @@ export function resolveMixture(
     const reagent = getReagent(id);
     const m = moles[id];
     if (!reagent || m <= 1e-9) continue;
+    if (reagent.role === "metal") continue; // undissolved solid — no liquid tint
     const [r, g, b] = hexToRgb(reagent.color);
     acc = [acc[0] + r * m, acc[1] + g * m, acc[2] + b * m];
     totalMol += m;

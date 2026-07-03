@@ -6,7 +6,13 @@
  * the appearance/reaction logic lives in resolve.ts.
  */
 
-export type ReagentRole = "acid" | "base" | "indicator" | "salt" | "solvent";
+export type ReagentRole =
+  | "acid"
+  | "base"
+  | "indicator"
+  | "salt"
+  | "solvent"
+  | "metal";
 
 export interface Reagent {
   id: string;
@@ -221,6 +227,14 @@ export const REAGENTS: Reagent[] = [
     role: "indicator",
     aliquotMl: 5,
   },
+
+  // ── Elements: reactive metals (reactivity series) ──
+  { id: "na", name: "Sodium", formula: "Na", color: "#c9cace", colorless: false, role: "metal", aliquotMl: 6, hazard: "Reacts violently with water" },
+  { id: "ca", name: "Calcium", formula: "Ca", color: "#d6d6cc", colorless: false, role: "metal", aliquotMl: 8, hazard: "Reacts with water" },
+  { id: "mg", name: "Magnesium", formula: "Mg", color: "#c2c2c6", colorless: false, role: "metal", aliquotMl: 10 },
+  { id: "zn", name: "Zinc", formula: "Zn", color: "#a9abb0", colorless: false, role: "metal", aliquotMl: 10 },
+  { id: "fe", name: "Iron", formula: "Fe", color: "#8f9094", colorless: false, role: "metal", aliquotMl: 10 },
+  { id: "cu", name: "Copper", formula: "Cu", color: "#b26a3d", colorless: false, role: "metal", aliquotMl: 10 },
 ];
 
 export const REAGENTS_BY_ID: Record<string, Reagent> = Object.fromEntries(

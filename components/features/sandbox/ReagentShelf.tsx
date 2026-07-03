@@ -1,12 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { REAGENTS } from "@/lib/chemistry/reagents";
 import { useSandbox } from "@/lib/stores/sandboxStore";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 import { cn } from "@/lib/utils";
 
-const ELEMENT_TEASER = ["H", "O", "Na", "Cl", "Cu"];
+const COMPOUNDS = REAGENTS.filter((r) => r.role !== "metal");
+const METALS = REAGENTS.filter((r) => r.role === "metal");
 
 export function ReagentShelf() {
   const selectedId = useSandbox((s) => s.selectedVesselId);
@@ -27,7 +29,7 @@ export function ReagentShelf() {
 
       <div className="max-h-[360px] overflow-y-auto pr-1">
         <div className="grid grid-cols-2 gap-2">
-          {REAGENTS.map((reagent) => (
+          {COMPOUNDS.map((reagent) => (
             <button
               key={reagent.id}
               type="button"
@@ -56,23 +58,46 @@ export function ReagentShelf() {
         </div>
       </div>
 
-      {/* Planned: an Elements shelf that ties into the periodic table (Module 3). */}
-      <div className="mt-4 rounded-ctrl border border-dashed border-line-strong p-3">
+      {/* Elements: reactive metals demonstrate the reactivity series (ties to Module 3). */}
+      <div className="mt-4 border-t border-line pt-4">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-xs font-semibold text-ink">Elements</span>
-          <Pill tone="outline">Coming soon</Pill>
+          <span className="text-xs font-semibold text-ink">Elements · metals</span>
+          <Link
+            href="/periodic-table"
+            className="text-[11px] font-medium text-ink-2 transition hover:text-ink"
+          >
+            Periodic table →
+          </Link>
         </div>
         <p className="mb-2.5 text-[11px] leading-relaxed text-ink-2">
-          Pull elements from the periodic table to build your own compounds.
+          Drop a metal into acid or water — reactivity follows the periodic
+          table. Na &amp; Ca react with water; Mg, Zn &amp; Fe with acid; Cu with
+          neither.
         </p>
-        <div className="flex gap-1.5">
-          {ELEMENT_TEASER.map((symbol) => (
-            <span
-              key={symbol}
-              className="grid h-7 w-7 place-items-center rounded-md bg-surface-2 text-[11px] font-semibold text-ink-3"
+        <div className="grid grid-cols-3 gap-2">
+          {METALS.map((metal) => (
+            <button
+              key={metal.id}
+              type="button"
+              disabled={disabled}
+              onClick={() => selectedId && addReagent(selectedId, metal.id)}
+              title={metal.name}
+              className={cn(
+                "flex items-center gap-2 rounded-ctrl border border-line bg-surface px-2 py-1.5 text-left transition",
+                "hover:border-line-strong hover:bg-surface-2 active:scale-[0.98]",
+                "disabled:pointer-events-none disabled:opacity-40",
+              )}
             >
-              {symbol}
-            </span>
+              <span
+                className="grid h-7 w-7 shrink-0 place-items-center rounded-md text-[11px] font-bold text-ink"
+                style={{ backgroundColor: metal.color }}
+              >
+                {metal.formula}
+              </span>
+              <span className="min-w-0 truncate text-[11px] font-medium text-ink-2">
+                {metal.name}
+              </span>
+            </button>
           ))}
         </div>
       </div>
