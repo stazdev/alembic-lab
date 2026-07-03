@@ -3,13 +3,13 @@
  *
  * The authoritative model of the live bench: vessels, their mixtures,
  * temperature, and a narrated observation log. The SVG render layer is a pure
- * projection of this store; chemistry is computed by resolveAppearance().
+ * projection of this store; chemistry is computed by resolveMixture().
  */
 import { create } from "zustand";
 import { getApparatus } from "@/data/apparatus";
 import { getReagent } from "@/lib/chemistry/reagents";
 import {
-  resolveAppearance,
+  resolveMixture,
   totalVolume,
   type MixtureComponent,
   type Observable,
@@ -98,7 +98,7 @@ function collectObservations(
   vessel: Vessel,
   obsCounter: number,
 ): { vessel: Vessel; observations: Observation[]; obsCounter: number } {
-  const appearance = resolveAppearance(vessel.components, vessel.temperatureC);
+  const appearance = resolveMixture(vessel.components, vessel.temperatureC).appearance;
   const fresh = appearance.observables.filter((o) => !vessel.seen.includes(o.id));
   if (fresh.length === 0) return { vessel, observations: [], obsCounter };
 
@@ -220,17 +220,14 @@ export const useSandbox = create<SandboxState>((set, get) => ({
       const added = Math.min(reagent.aliquotMl, room);
       const components = upsert(vessel.components, reagentId, added);
 
-      // Acid + base neutralisation is exothermic — nudge the temperature up.
-      const ACIDS = ["hcl", "h2so4"];
-      const BASES = ["naoh", "na2co3", "ammonia"];
-      let temperatureC = vessel.temperatureC;
-      const hasAcid = components.some(
-        (c) => ACIDS.includes(c.reagentId) && c.amountMl > 0,
-      );
-      const hasBase = components.some(
-        (c) => BASES.includes(c.reagentId) && c.amountMl > 0,
-      );
-      if (hasAcid && hasBase) temperatureC = Math.min(55, temperatureC + 6);
+      // Real calorimetry: apply the heat released by any newly-enabled reaction
+      // (q = ΔH·extent → ΔT = q / m·c), rather than a fixed nudge.
+      const oldHeat = resolveMixture(vessel.components, vessel.temperatureC).heatKJ;
+      const newHeat = resolveMixture(components, vessel.temperatureC).heatKJ;
+      const massG = totalVolume(components); // ≈ g for dilute aqueous
+      const dT =
+        massG > 0 ? (Math.max(0, newHeat - oldHeat) * 1000) / (massG * 4.18) : 0;
+      const temperatureC = Math.min(100, vessel.temperatureC + dT);
 
       const updated: Vessel = { ...vessel, components, temperatureC };
       const result = collectObservations(updated, state.obsCounter);
@@ -280,6 +277,17 @@ export const useSandbox = create<SandboxState>((set, get) => ({
       const newTargetTemp =
         (targetVol * target.temperatureC + poured * source.temperatureC) /
         (targetVol + poured);
+      // Calorimetry: heat from reactions enabled by combining the two mixtures.
+      const preHeat =
+        resolveMixture(target.components, target.temperatureC).heatKJ +
+        resolveMixture(moved, source.temperatureC).heatKJ;
+      const mergedHeat = resolveMixture(newTargetComponents, newTargetTemp).heatKJ;
+      const mergedMassG = totalVolume(newTargetComponents);
+      const pourDT =
+        mergedMassG > 0
+          ? (Math.max(0, mergedHeat - preHeat) * 1000) / (mergedMassG * 4.18)
+          : 0;
+      const finalTargetTemp = Math.min(100, newTargetTemp + pourDT);
       const newSourceComponents = source.components
         .map((c) => ({ ...c, amountMl: c.amountMl * (1 - fraction) }))
         .filter((c) => c.amountMl > 0.01);
@@ -295,7 +303,7 @@ export const useSandbox = create<SandboxState>((set, get) => ({
           const merged: Vessel = {
             ...v,
             components: newTargetComponents,
-            temperatureC: newTargetTemp,
+            temperatureC: finalTargetTemp,
           };
           const result = collectObservations(merged, obsCounter);
           obsCounter = result.obsCounter;

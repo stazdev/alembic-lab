@@ -1,11 +1,15 @@
 /**
- * Mixture → appearance resolver (§1.2, seed of the Module 2 engine).
+ * Mixture engine (Module 1 §1.2 × Module 2 §2.1).
  *
- * Pure and deterministic. Reactions are expressed as data (a rule list, each
- * carrying its balanced equation) so the set scales without touching logic and
- * the observation log can display the equation of whatever is happening.
+ * The real reaction pipeline the sandbox runs on: convert reagents to moles,
+ * apply reactions in priority order consuming reactants by the LIMITING reagent,
+ * accumulate precipitate / gas / reaction heat, then compute the solution's pH
+ * from what's left (reusing the pH engine) and project it all to an appearance.
+ *
+ * Pure and deterministic. Relative imports only, so it is Node-testable.
  */
 import { getReagent, COLORLESS_TINT } from "./reagents";
+import { strongAcidPH, strongBasePH, weakBasePH, pKaToKa } from "./ph";
 
 export interface MixtureComponent {
   reagentId: string;
@@ -13,11 +17,9 @@ export interface MixtureComponent {
 }
 
 export interface Observable {
-  /** Stable id so the observation log can de-duplicate. */
   id: string;
   text: string;
   kind: "color" | "precipitate" | "gas" | "thermal" | "note";
-  /** Balanced equation for this reaction, if one applies. */
   equation?: string;
 }
 
@@ -30,300 +32,291 @@ export interface Appearance {
   observables: Observable[];
 }
 
+export interface MixtureResult {
+  appearance: Appearance;
+  /** Solution pH, or null when there's no liquid. */
+  pH: number | null;
+  /** Total reaction heat released for this mixture (kJ). */
+  heatKJ: number;
+}
+
 const PINK = "#e85c8a";
 const BOILING_POINT_C = 99.5;
+const KB_AMMONIA = pKaToKa(4.75); // ≈ 1.8×10⁻⁵
 
-/**
- * Two-reagent reactions. Effects: `precipitate` colour, `gas` (bubbles),
- * `colorOverride` (e.g. a complex), or `thermal` (exotherm note).
- */
-interface ComboRule {
+/** Sandbox reagent concentrations (mol/L) — lab-strength so effects are visible. */
+const CONC: Record<string, number> = {
+  hcl: 1, naoh: 1, h2so4: 1, ammonia: 1,
+  na2co3: 0.5, caco3: 0.5,
+  cuso4: 0.5, agno3: 0.5, nacl: 0.5, fecl3: 0.5,
+  pb_no3: 0.5, ki: 0.5, bacl2: 0.5, cocl2: 0.5,
+  kmno4: 0.1,
+};
+
+interface Reaction {
   id: string;
-  reactants: [string, string];
+  reactants: { id: string; coeff: number }[];
+  /** Tracked products that re-enter the solution (only acids matter for pH). */
+  produces?: { id: string; coeff: number }[];
   equation: string;
   text: string;
   kind: Observable["kind"];
+  /** kJ per mole of reaction; negative = exothermic. */
+  deltaHkJ: number;
   precipitate?: string;
   gas?: boolean;
   colorOverride?: string;
-  thermal?: boolean;
 }
 
-const COMBO_RULES: ComboRule[] = [
-  // ── Precipitations ──
+// Priority order: neutralisation → carbonate gas → hydroxide precip → other precip → complex.
+const REACTIONS: Reaction[] = [
   {
-    id: "agcl",
-    reactants: ["agno3", "nacl"],
-    equation: "AgNO₃ + NaCl → AgCl↓ + NaNO₃",
-    text: "A white silver chloride precipitate forms.",
-    kind: "precipitate",
-    precipitate: "#eef0ee",
+    id: "neut-hcl-naoh",
+    reactants: [{ id: "hcl", coeff: 1 }, { id: "naoh", coeff: 1 }],
+    equation: "HCl + NaOH → NaCl + H₂O",
+    text: "Acid and base neutralise, releasing heat.",
+    kind: "thermal",
+    deltaHkJ: -57.3,
   },
   {
-    id: "cu-oh2",
-    reactants: ["cuso4", "naoh"],
-    equation: "CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄",
-    text: "A pale-blue copper(II) hydroxide precipitate forms.",
-    kind: "precipitate",
-    precipitate: "#2b73b8",
+    id: "neut-h2so4-naoh",
+    reactants: [{ id: "h2so4", coeff: 1 }, { id: "naoh", coeff: 2 }],
+    equation: "H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O",
+    text: "Acid and base neutralise, releasing heat.",
+    kind: "thermal",
+    deltaHkJ: -114.6,
   },
-  {
-    id: "fe-oh3",
-    reactants: ["fecl3", "naoh"],
-    equation: "FeCl₃ + 3NaOH → Fe(OH)₃↓ + 3NaCl",
-    text: "A red-brown iron(III) hydroxide precipitate forms.",
-    kind: "precipitate",
-    precipitate: "#6b3f22",
-  },
-  {
-    id: "pbi2",
-    reactants: ["pb_no3", "ki"],
-    equation: "Pb(NO₃)₂ + 2KI → PbI₂↓ + 2KNO₃",
-    text: "Bright-yellow lead(II) iodide precipitates — the ‘golden rain’.",
-    kind: "precipitate",
-    precipitate: "#e6c72e",
-  },
-  {
-    id: "baso4",
-    reactants: ["bacl2", "h2so4"],
-    equation: "BaCl₂ + H₂SO₄ → BaSO₄↓ + 2HCl",
-    text: "A dense white barium sulfate precipitate forms.",
-    kind: "precipitate",
-    precipitate: "#eef0ee",
-  },
-  // ── Complex ──
-  {
-    id: "cu-ammine",
-    reactants: ["cuso4", "ammonia"],
-    equation: "CuSO₄ + 4NH₃ → [Cu(NH₃)₄]SO₄",
-    text: "A deep-blue copper–ammonia complex forms.",
-    kind: "color",
-    colorOverride: "#173fa6",
-  },
-  // ── Gas ──
   {
     id: "co2-na2co3-hcl",
-    reactants: ["na2co3", "hcl"],
+    reactants: [{ id: "na2co3", coeff: 1 }, { id: "hcl", coeff: 2 }],
     equation: "Na₂CO₃ + 2HCl → 2NaCl + H₂O + CO₂↑",
     text: "Carbon dioxide fizzes off as bubbles.",
     kind: "gas",
-    gas: true,
-  },
-  {
-    id: "co2-na2co3-h2so4",
-    reactants: ["na2co3", "h2so4"],
-    equation: "Na₂CO₃ + H₂SO₄ → Na₂SO₄ + H₂O + CO₂↑",
-    text: "Carbon dioxide fizzes off as bubbles.",
-    kind: "gas",
+    deltaHkJ: -30,
     gas: true,
   },
   {
     id: "co2-caco3-hcl",
-    reactants: ["caco3", "hcl"],
+    reactants: [{ id: "caco3", coeff: 1 }, { id: "hcl", coeff: 2 }],
     equation: "CaCO₃ + 2HCl → CaCl₂ + H₂O + CO₂↑",
     text: "The carbonate fizzes, releasing carbon dioxide.",
     kind: "gas",
+    deltaHkJ: -15,
     gas: true,
   },
-  // ── Neutralisations (exothermic) ──
   {
-    id: "neutralise-hcl-naoh",
-    reactants: ["hcl", "naoh"],
-    equation: "HCl + NaOH → NaCl + H₂O",
-    text: "Acid and base neutralise, releasing heat.",
-    kind: "thermal",
-    thermal: true,
+    id: "cu-oh2",
+    reactants: [{ id: "cuso4", coeff: 1 }, { id: "naoh", coeff: 2 }],
+    equation: "CuSO₄ + 2NaOH → Cu(OH)₂↓ + Na₂SO₄",
+    text: "A pale-blue copper(II) hydroxide precipitate forms.",
+    kind: "precipitate",
+    deltaHkJ: -50,
+    precipitate: "#2b73b8",
   },
   {
-    id: "neutralise-h2so4-naoh",
-    reactants: ["h2so4", "naoh"],
-    equation: "H₂SO₄ + 2NaOH → Na₂SO₄ + 2H₂O",
-    text: "Acid and base neutralise, releasing heat.",
-    kind: "thermal",
-    thermal: true,
+    id: "fe-oh3",
+    reactants: [{ id: "fecl3", coeff: 1 }, { id: "naoh", coeff: 3 }],
+    equation: "FeCl₃ + 3NaOH → Fe(OH)₃↓ + 3NaCl",
+    text: "A red-brown iron(III) hydroxide precipitate forms.",
+    kind: "precipitate",
+    deltaHkJ: -80,
+    precipitate: "#6b3f22",
+  },
+  {
+    id: "agcl",
+    reactants: [{ id: "agno3", coeff: 1 }, { id: "nacl", coeff: 1 }],
+    equation: "AgNO₃ + NaCl → AgCl↓ + NaNO₃",
+    text: "A white silver chloride precipitate forms.",
+    kind: "precipitate",
+    deltaHkJ: -65.5,
+    precipitate: "#eef0ee",
+  },
+  {
+    id: "pbi2",
+    reactants: [{ id: "pb_no3", coeff: 1 }, { id: "ki", coeff: 2 }],
+    equation: "Pb(NO₃)₂ + 2KI → PbI₂↓ + 2KNO₃",
+    text: "Bright-yellow lead(II) iodide precipitates.",
+    kind: "precipitate",
+    deltaHkJ: -45,
+    precipitate: "#e6c72e",
+  },
+  {
+    id: "baso4",
+    reactants: [{ id: "bacl2", coeff: 1 }, { id: "h2so4", coeff: 1 }],
+    produces: [{ id: "hcl", coeff: 2 }],
+    equation: "BaCl₂ + H₂SO₄ → BaSO₄↓ + 2HCl",
+    text: "A dense white barium sulfate precipitate forms.",
+    kind: "precipitate",
+    deltaHkJ: -25,
+    precipitate: "#eef0ee",
+  },
+  {
+    id: "cu-ammine",
+    reactants: [{ id: "cuso4", coeff: 1 }, { id: "ammonia", coeff: 4 }],
+    equation: "CuSO₄ + 4NH₃ → [Cu(NH₃)₄]SO₄",
+    text: "A deep-blue copper–ammonia complex forms.",
+    kind: "color",
+    deltaHkJ: -40,
+    colorOverride: "#173fa6",
   },
 ];
 
 // ── colour helpers ────────────────────────────────────────────
 type Rgb = [number, number, number];
-
 function hexToRgb(hex: string): Rgb {
   const h = hex.replace("#", "");
-  return [
-    parseInt(h.slice(0, 2), 16),
-    parseInt(h.slice(2, 4), 16),
-    parseInt(h.slice(4, 6), 16),
-  ];
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
 }
-
 function rgbToHex([r, g, b]: Rgb): string {
-  const c = (n: number) =>
-    Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
+  const c = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0");
   return `#${c(r)}${c(g)}${c(b)}`;
 }
-
 function mix(a: string, b: string, t: number): string {
   const ca = hexToRgb(a);
   const cb = hexToRgb(b);
-  return rgbToHex([
-    ca[0] + (cb[0] - ca[0]) * t,
-    ca[1] + (cb[1] - ca[1]) * t,
-    ca[2] + (cb[2] - ca[2]) * t,
-  ]);
+  return rgbToHex([ca[0] + (cb[0] - ca[0]) * t, ca[1] + (cb[1] - ca[1]) * t, ca[2] + (cb[2] - ca[2]) * t]);
 }
 
 export function totalVolume(components: MixtureComponent[]): number {
   return components.reduce((sum, c) => sum + c.amountMl, 0);
 }
 
-function amountOf(components: MixtureComponent[], id: string): number {
-  return components.find((c) => c.reagentId === id)?.amountMl ?? 0;
+const molesFromMl = (id: string, amountMl: number): number =>
+  (amountMl / 1000) * (CONC[id] ?? 0.5);
+
+function clampPH(p: number): number {
+  return Math.max(0, Math.min(14, p));
 }
 
-function blendColor(components: MixtureComponent[], volume: number): string {
-  if (volume <= 0) return COLORLESS_TINT;
-  const acc: Rgb = [0, 0, 0];
-  for (const c of components) {
-    const reagent = getReagent(c.reagentId);
-    if (!reagent) continue;
-    const [r, g, b] = hexToRgb(reagent.color);
-    const w = c.amountMl / volume;
-    acc[0] += r * w;
-    acc[1] += g * w;
-    acc[2] += b * w;
+/** pH from the acids and bases remaining after reactions. */
+function computePH(moles: Record<string, number>, volumeL: number): number {
+  const H = (moles.hcl ?? 0) + 2 * (moles.h2so4 ?? 0);
+  const strongOH = moles.naoh ?? 0;
+  const weakBase = (moles.ammonia ?? 0) + 2 * (moles.na2co3 ?? 0) + 2 * (moles.caco3 ?? 0);
+  if (H <= 1e-9 && strongOH <= 1e-9 && weakBase <= 1e-9) return 7;
+
+  const net1 = H - strongOH; // strong acid vs strong base
+  if (net1 > 1e-9) {
+    const net2 = net1 - weakBase; // weak base then mops up excess acid
+    if (net2 > 1e-9) return clampPH(strongAcidPH(net2 / volumeL));
+    if (net2 < -1e-9) return clampPH(weakBasePH(-net2 / volumeL, KB_AMMONIA));
+    return 7;
   }
-  return rgbToHex(acc);
+  if (net1 < -1e-9) return clampPH(strongBasePH(-net1 / volumeL));
+  return weakBase > 1e-9 ? clampPH(weakBasePH(weakBase / volumeL, KB_AMMONIA)) : 7;
 }
 
-export function resolveAppearance(
+function present(components: MixtureComponent[], id: string): boolean {
+  return components.some((c) => c.reagentId === id && c.amountMl > 0);
+}
+
+export function resolveMixture(
   components: MixtureComponent[],
   temperatureC: number,
-): Appearance {
-  const volume = totalVolume(components);
+): MixtureResult {
+  const volumeMl = totalVolume(components);
   const observables: Observable[] = [];
+  const empty: Appearance = {
+    liquidColor: COLORLESS_TINT,
+    liquidOpacity: 0,
+    precipitate: null,
+    gasRate: 0,
+    boiling: false,
+    observables,
+  };
+  if (volumeMl <= 0) return { appearance: empty, pH: null, heatKJ: 0 };
+  const V = volumeMl / 1000;
 
-  if (volume <= 0) {
-    return {
-      liquidColor: COLORLESS_TINT,
-      liquidOpacity: 0,
-      precipitate: null,
-      gasRate: 0,
-      boiling: false,
-      observables,
-    };
+  // Local moles map (consumed as reactions proceed).
+  const moles: Record<string, number> = {};
+  for (const c of components) moles[c.reagentId] = molesFromMl(c.reagentId, c.amountMl);
+
+  let heatKJ = 0;
+  let precipitate: Appearance["precipitate"] = null;
+  let precipExtent = 0;
+  let gasRate = 0;
+  let complexColor: string | null = null;
+
+  for (const rxn of REACTIONS) {
+    let extent = Infinity;
+    for (const r of rxn.reactants) extent = Math.min(extent, (moles[r.id] ?? 0) / r.coeff);
+    if (!Number.isFinite(extent) || extent <= 1e-9) continue;
+
+    for (const r of rxn.reactants) moles[r.id] = (moles[r.id] ?? 0) - extent * r.coeff;
+    if (rxn.produces) for (const p of rxn.produces) moles[p.id] = (moles[p.id] ?? 0) + extent * p.coeff;
+
+    heatKJ += Math.max(0, -rxn.deltaHkJ) * extent;
+    if (rxn.precipitate && extent > precipExtent) {
+      precipExtent = extent;
+      precipitate = { color: rxn.precipitate, amount: Math.min(25, extent * 1250) };
+    }
+    if (rxn.gas) gasRate = Math.max(gasRate, Math.min(1, extent / 0.006));
+    if (rxn.colorOverride) complexColor = rxn.colorOverride;
+    observables.push({ id: rxn.id, text: rxn.text, kind: rxn.kind, equation: rxn.equation });
   }
 
-  const amt = (id: string) => amountOf(components, id);
+  const pH = computePH(moles, V);
 
-  let liquidColor = blendColor(components, volume);
+  // ── colour ──
+  let acc: Rgb = [0, 0, 0];
+  let totalMol = 0;
+  for (const id in moles) {
+    const reagent = getReagent(id);
+    const m = moles[id];
+    if (!reagent || m <= 1e-9) continue;
+    const [r, g, b] = hexToRgb(reagent.color);
+    acc = [acc[0] + r * m, acc[1] + g * m, acc[2] + b * m];
+    totalMol += m;
+  }
+  let liquidColor = totalMol > 0 ? rgbToHex([acc[0] / totalMol, acc[1] / totalMol, acc[2] / totalMol]) : COLORLESS_TINT;
   let liquidOpacity = 0.55;
-  let precipitate: Appearance["precipitate"] = null;
-  let gasRate = 0;
-
-  if (amt("cuso4") || amt("kmno4") || amt("fecl3") || amt("cocl2")) {
+  if (present(components, "cuso4") || present(components, "kmno4") || present(components, "fecl3") || present(components, "cocl2")) {
     liquidOpacity = 0.82;
   }
-
-  // Data-driven two-reagent reactions.
-  for (const rule of COMBO_RULES) {
-    const a = amt(rule.reactants[0]);
-    const b = amt(rule.reactants[1]);
-    if (a <= 0 || b <= 0) continue;
-
-    if (rule.precipitate) {
-      precipitate = { color: rule.precipitate, amount: Math.min(a, b) };
-      liquidOpacity = 0.9;
-    }
-    if (rule.gas) {
-      gasRate = Math.max(gasRate, Math.min(1, Math.min(a, b) / 25));
-    }
-    if (rule.colorOverride) {
-      liquidColor = rule.colorOverride;
-      liquidOpacity = Math.max(liquidOpacity, 0.85);
-    }
-    observables.push({
-      id: rule.id,
-      text: rule.text,
-      kind: rule.kind,
-      equation: rule.equation,
-    });
+  if (complexColor) {
+    liquidColor = complexColor;
+    liquidOpacity = Math.max(liquidOpacity, 0.85);
   }
+  if (precipitate) liquidOpacity = 0.9;
 
-  // Indicators (only meaningful when there's an acid or base present).
-  const acidAmt = amt("hcl") + amt("h2so4");
-  const baseAmt = amt("naoh") + amt("na2co3") + amt("ammonia");
-  const hasAcidBase = acidAmt > 0 || baseAmt > 0;
-  const net = acidAmt - baseAmt; // > 0 acidic, < 0 basic
-
-  if (hasAcidBase && amt("phenolphthalein") > 0 && net < -2) {
+  // ── indicators (driven by the real pH) ──
+  if (present(components, "phenolphthalein") && pH >= 8.2) {
     liquidColor = mix(liquidColor, PINK, 0.85);
     liquidOpacity = Math.max(liquidOpacity, 0.7);
-    observables.push({
-      id: "ind-phph",
-      kind: "color",
-      text: "Phenolphthalein turns pink — the solution is basic.",
-    });
+    observables.push({ id: "ind-phph", kind: "color", text: `Phenolphthalein is pink — the solution is basic (pH ${pH.toFixed(1)}).` });
   }
-  if (hasAcidBase && amt("methyl_orange") > 0) {
-    if (net > 2) {
+  if (present(components, "methyl_orange")) {
+    if (pH <= 3.5) {
       liquidColor = mix(liquidColor, "#e0492e", 0.8);
-      observables.push({
-        id: "ind-mo-acid",
-        kind: "color",
-        text: "Methyl orange turns red — the solution is acidic.",
-      });
+      observables.push({ id: "ind-mo-red", kind: "color", text: "Methyl orange is red — strongly acidic." });
     } else {
       liquidColor = mix(liquidColor, "#f0a11f", 0.7);
-      observables.push({
-        id: "ind-mo-base",
-        kind: "color",
-        text: "Methyl orange stays yellow-orange — not acidic.",
-      });
+      observables.push({ id: "ind-mo-yellow", kind: "color", text: "Methyl orange is yellow-orange — not acidic." });
     }
   }
-  if (hasAcidBase && amt("bromothymol") > 0) {
-    if (net > 2) {
+  if (present(components, "bromothymol")) {
+    if (pH <= 6) {
       liquidColor = mix(liquidColor, "#d9c73a", 0.75);
-      observables.push({
-        id: "ind-btb-acid",
-        kind: "color",
-        text: "Bromothymol blue turns yellow — acidic.",
-      });
-    } else if (net < -2) {
+      observables.push({ id: "ind-btb-yellow", kind: "color", text: "Bromothymol blue is yellow — acidic." });
+    } else if (pH >= 7.6) {
       liquidColor = mix(liquidColor, "#2f68cf", 0.8);
-      observables.push({
-        id: "ind-btb-base",
-        kind: "color",
-        text: "Bromothymol blue turns blue — basic.",
-      });
+      observables.push({ id: "ind-btb-blue", kind: "color", text: "Bromothymol blue is blue — basic." });
     } else {
       liquidColor = mix(liquidColor, "#3f9e54", 0.75);
-      observables.push({
-        id: "ind-btb-neutral",
-        kind: "color",
-        text: "Bromothymol blue is green — close to neutral.",
-      });
+      observables.push({ id: "ind-btb-green", kind: "color", text: "Bromothymol blue is green — near neutral." });
     }
   }
 
-  // Boiling
+  // ── boiling ──
   const boiling = temperatureC >= BOILING_POINT_C;
   if (boiling) {
     gasRate = Math.max(gasRate, 0.8);
-    observables.push({
-      id: "boil",
-      kind: "gas",
-      text: "The solution reaches 100 °C and boils.",
-      equation: "H₂O(l) ⇌ H₂O(g)",
-    });
+    observables.push({ id: "boil", kind: "gas", text: "The solution reaches 100 °C and boils.", equation: "H₂O(l) ⇌ H₂O(g)" });
   }
 
   return {
-    liquidColor,
-    liquidOpacity,
-    precipitate,
-    gasRate,
-    boiling,
-    observables,
+    appearance: { liquidColor, liquidOpacity, precipitate, gasRate, boiling, observables },
+    pH,
+    heatKJ,
   };
 }

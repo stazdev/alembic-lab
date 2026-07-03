@@ -3,7 +3,7 @@
 import type { MouseEvent } from "react";
 import { Droplets, Flame, Thermometer, Trash2, X } from "lucide-react";
 import { getApparatus } from "@/data/apparatus";
-import { resolveAppearance, totalVolume } from "@/lib/chemistry/resolve";
+import { resolveMixture, totalVolume } from "@/lib/chemistry/resolve";
 import { useSandbox, type Vessel } from "@/lib/stores/sandboxStore";
 import { VesselView } from "./VesselView";
 import { IconButton } from "@/components/ui/IconButton";
@@ -26,7 +26,7 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
   const iconKind = apparatus?.icon ?? "beaker";
   const volume = totalVolume(vessel.components);
   const fillFrac = volume / capacity;
-  const appearance = resolveAppearance(vessel.components, vessel.temperatureC);
+  const { appearance, pH } = resolveMixture(vessel.components, vessel.temperatureC);
 
   const selected = selectedId === vessel.id;
   const isSource = pourSourceId === vessel.id;
@@ -104,7 +104,7 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
       </div>
 
       {/* Readouts */}
-      <div className="mt-1 flex items-center justify-between text-xs">
+      <div className="mt-1 flex items-center justify-between gap-2 text-xs">
         <span
           className={cn(
             "inline-flex items-center gap-1 font-medium",
@@ -118,6 +118,9 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
           <Thermometer className="h-3.5 w-3.5" />
           {temp} °C{appearance.boiling ? " · boiling" : ""}
         </span>
+        {pH != null && volume > 0.01 && (
+          <span className="tabular-nums text-ink-2">pH {pH.toFixed(1)}</span>
+        )}
         <span className="tabular-nums text-ink-3">
           {Math.round(volume)} / {capacity} mL
         </span>

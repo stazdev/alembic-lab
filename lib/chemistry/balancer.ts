@@ -264,3 +264,173 @@ export function checkBalance(
     balanced: rows.length > 0 && positiveCoeffs && rows.every((r) => r.balanced),
   };
 }
+
+// ── redox (half-reaction / ion-electron) balancing (§2.2) ─────
+export interface ParsedIon {
+  formula: string; // atom part, e.g. "MnO4"
+  counts: Record<string, number>;
+  charge: number;
+  error?: string;
+}
+
+/**
+ * Parse an ion. Single charges use a trailing sign ("MnO4-", "Na+"); charges
+ * with magnitude > 1 use a caret ("Cr2O7^2-", "Fe^3+").
+ */
+export function parseIon(species: string): ParsedIon {
+  let s = species.trim();
+  if (!s) return { formula: "", counts: {}, charge: 0, error: "Empty species" };
+
+  let charge = 0;
+  const caret = s.match(/\^(\d*)([+-])$/);
+  if (caret) {
+    charge = (caret[1] === "" ? 1 : parseInt(caret[1], 10)) * (caret[2] === "+" ? 1 : -1);
+    s = s.slice(0, s.length - caret[0].length);
+  } else {
+    const sign = s.match(/([+-])$/);
+    if (sign) {
+      charge = sign[1] === "+" ? 1 : -1;
+      s = s.slice(0, s.length - 1);
+    }
+  }
+
+  if (!s) return { formula: "", counts: {}, charge, error: "Missing formula" };
+  const parsed = parseFormula(s);
+  if (parsed.error) return { formula: s, counts: parsed.counts, charge, error: parsed.error };
+  return { formula: s, counts: parsed.counts, charge };
+}
+
+/** Signed integer null-space vector (nullity 1), keeping signs. */
+function integerNullSpace(matrix: Frac[][], cols: number): number[] | null {
+  if (matrix.length === 0 || cols === 0) return null;
+  const M = matrix.map((row) => row.slice());
+  rref(M);
+
+  const isPivot = new Array<boolean>(cols).fill(false);
+  const pivotRowForCol: Record<number, number> = {};
+  for (let r = 0; r < M.length; r++) {
+    let lead = -1;
+    for (let c = 0; c < cols; c++) {
+      if (!fzero(M[r][c])) {
+        lead = c;
+        break;
+      }
+    }
+    if (lead >= 0) {
+      isPivot[lead] = true;
+      pivotRowForCol[lead] = r;
+    }
+  }
+
+  const freeCols: number[] = [];
+  for (let c = 0; c < cols; c++) if (!isPivot[c]) freeCols.push(c);
+  if (freeCols.length !== 1) return null;
+  const free = freeCols[0];
+
+  const x: Frac[] = Array.from({ length: cols }, () => frac(0));
+  x[free] = frac(1);
+  for (let c = 0; c < cols; c++) {
+    if (isPivot[c]) {
+      const r = pivotRowForCol[c];
+      x[c] = fmul(frac(-1), fmul(M[r][free], x[free]));
+    }
+  }
+
+  let lcm = 1;
+  for (const fr of x) lcm = (lcm / gcd(lcm, fr.d)) * fr.d;
+  let ints = x.map((fr) => Math.round((fr.n * lcm) / fr.d));
+  let g = 0;
+  for (const v of ints) g = gcd(g, v);
+  if (g > 1) ints = ints.map((v) => v / g);
+  return ints;
+}
+
+export interface RedoxTerm {
+  formula: string;
+  charge: number;
+  coeff: number;
+}
+
+export type RedoxMedium = "acidic" | "basic";
+
+export type RedoxResult =
+  | { ok: true; left: RedoxTerm[]; right: RedoxTerm[]; medium: RedoxMedium }
+  | { ok: false; error: string };
+
+interface RedoxCol {
+  formula: string;
+  counts: Record<string, number>;
+  charge: number;
+}
+
+/**
+ * Balance a net-ionic redox equation by conserving every element AND charge,
+ * with H2O and H+ (acidic) or OH- (basic) auto-included. Returns the balanced
+ * equation with electrons already cancelled.
+ */
+export function balanceRedox(
+  reactants: string[],
+  products: string[],
+  medium: RedoxMedium,
+): RedoxResult {
+  if (reactants.length === 0 || products.length === 0)
+    return { ok: false, error: "Need at least one reactant and one product." };
+
+  const user: RedoxCol[] = [];
+  const sides: ("r" | "p")[] = [];
+  for (const f of reactants) {
+    const p = parseIon(f);
+    if (p.error) return { ok: false, error: `“${f}”: ${p.error}` };
+    user.push({ formula: p.formula, counts: p.counts, charge: p.charge });
+    sides.push("r");
+  }
+  for (const f of products) {
+    const p = parseIon(f);
+    if (p.error) return { ok: false, error: `“${f}”: ${p.error}` };
+    user.push({ formula: p.formula, counts: p.counts, charge: p.charge });
+    sides.push("p");
+  }
+
+  const aux: RedoxCol[] =
+    medium === "basic"
+      ? [
+          { formula: "H2O", counts: { H: 2, O: 1 }, charge: 0 },
+          { formula: "OH", counts: { O: 1, H: 1 }, charge: -1 },
+        ]
+      : [
+          { formula: "H2O", counts: { H: 2, O: 1 }, charge: 0 },
+          { formula: "H", counts: { H: 1 }, charge: 1 },
+        ];
+
+  const cols = [...user, ...aux];
+  const elements = Array.from(new Set(cols.flatMap((c) => Object.keys(c.counts))));
+  const matrix: Frac[][] = [
+    ...elements.map((el) => cols.map((c) => frac(c.counts[el] ?? 0))),
+    cols.map((c) => frac(c.charge)),
+  ];
+
+  const v = integerNullSpace(matrix, cols.length);
+  if (!v || v[0] === 0)
+    return { ok: false, error: "Couldn't balance — check the ions, charges, and sides." };
+
+  // Orient so the first reactant is positive (left side).
+  if (v[0] < 0) for (let i = 0; i < v.length; i++) v[i] = -v[i];
+
+  // User species must land on their entered side.
+  for (let i = 0; i < user.length; i++) {
+    if (sides[i] === "r" && v[i] <= 0)
+      return { ok: false, error: `“${user[i].formula}” doesn’t fit as a reactant — check the sides.` };
+    if (sides[i] === "p" && v[i] >= 0)
+      return { ok: false, error: `“${user[i].formula}” doesn’t fit as a product — check the sides.` };
+  }
+
+  const left: RedoxTerm[] = [];
+  const right: RedoxTerm[] = [];
+  for (let i = 0; i < cols.length; i++) {
+    if (v[i] === 0) continue;
+    const term: RedoxTerm = { formula: cols[i].formula, charge: cols[i].charge, coeff: Math.abs(v[i]) };
+    if (v[i] > 0) left.push(term);
+    else right.push(term);
+  }
+  return { ok: true, left, right, medium };
+}

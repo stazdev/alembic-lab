@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState, type FormEvent } from "react";
+import { useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Lightbulb, Plus, RotateCcw, Wand2, X } from "lucide-react";
+import { Check, Lightbulb, RotateCcw, Wand2, X } from "lucide-react";
 import {
   balanceEquation,
   checkBalance,
@@ -10,6 +10,7 @@ import {
   type BalanceCheck,
 } from "@/lib/chemistry/balancer";
 import { FormulaText } from "@/components/chem/FormulaText";
+import { AddSpeciesInput } from "./AddSpeciesInput";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { NumberStepper } from "@/components/ui/NumberStepper";
@@ -85,56 +86,6 @@ function SpeciesChip({
         <X className="h-3.5 w-3.5" />
       </button>
     </div>
-  );
-}
-
-function AddSpecies({
-  placeholder,
-  onAdd,
-}: {
-  placeholder: string;
-  onAdd: (formula: string) => string | null;
-}) {
-  const [value, setValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
-
-  function submit(e: FormEvent) {
-    e.preventDefault();
-    const err = onAdd(value);
-    if (err) setError(err);
-    else {
-      setValue("");
-      setError(null);
-    }
-  }
-
-  return (
-    <form onSubmit={submit} className="flex flex-col gap-1">
-      <div className="flex h-12 items-center gap-1 rounded-ctrl border border-dashed border-line-strong bg-surface px-2 transition focus-within:border-ink-2">
-        <input
-          value={value}
-          onChange={(e) => {
-            setValue(e.target.value);
-            setError(null);
-          }}
-          placeholder={placeholder}
-          aria-label={placeholder}
-          className="w-24 bg-transparent text-sm text-ink placeholder:text-ink-3 focus:outline-none"
-        />
-        <button
-          type="submit"
-          aria-label="Add species"
-          className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-ink text-on-dark transition hover:bg-dark-2"
-        >
-          <Plus className="h-3.5 w-3.5" />
-        </button>
-      </div>
-      {error && (
-        <span className="text-[11px]" style={{ color: ERR_RED }}>
-          {error}
-        </span>
-      )}
-    </form>
   );
 }
 
@@ -274,10 +225,8 @@ export function EquationBalancer() {
   const renderSide = (list: SpeciesItem[]) =>
     list.map((s, i) => (
       <span key={s.id} className="inline-flex items-baseline">
-        {i > 0 && <span className="mx-1.5 text-ink-3">+</span>}
-        {s.coeff !== 1 && (
-          <span className="mr-0.5 font-semibold text-ink">{s.coeff}</span>
-        )}
+        {i > 0 && <span className="mx-1.5 text-on-dark-2">+</span>}
+        {s.coeff !== 1 && <span className="mr-0.5 font-semibold">{s.coeff}</span>}
         <FormulaText formula={s.formula} />
       </span>
     ));
@@ -317,9 +266,10 @@ export function EquationBalancer() {
                 onRemove={() => removeSpecies("reactant", item.id)}
               />
             ))}
-            <AddSpecies
+            <AddSpeciesInput
               placeholder="reactant"
               onAdd={(f) => addSpecies("reactant", f)}
+              className="h-12"
             />
           </div>
 
@@ -336,9 +286,10 @@ export function EquationBalancer() {
                 onRemove={() => removeSpecies("product", item.id)}
               />
             ))}
-            <AddSpecies
+            <AddSpeciesInput
               placeholder="product"
               onAdd={(f) => addSpecies("product", f)}
+              className="h-12"
             />
           </div>
         </div>
