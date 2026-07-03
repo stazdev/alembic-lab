@@ -1,4 +1,4 @@
-import { PageHeader } from "@/components/features/shell/PageHeader";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { InventoryRoom } from "@/components/features/inventory/InventoryRoom";
 import { BenchTray } from "@/components/features/bench/BenchTray";
 

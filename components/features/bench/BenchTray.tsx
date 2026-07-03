@@ -8,7 +8,7 @@ import {
   type BenchItem,
 } from "@/lib/stores/benchStore";
 import { getApparatus } from "@/data/apparatus";
-import { ApparatusIcon } from "@/components/features/inventory/ApparatusIcon";
+import { ApparatusIcon } from "@/components/chem/ApparatusIcon";
 import Link from "next/link";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";

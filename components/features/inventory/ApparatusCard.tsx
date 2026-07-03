@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Info, Plus } from "lucide-react";
 import { CATEGORIES, type Apparatus } from "@/data/apparatus";
 import { useBench, selectQuantityFor } from "@/lib/stores/benchStore";
-import { ApparatusIcon } from "./ApparatusIcon";
+import { ApparatusIcon } from "@/components/chem/ApparatusIcon";
 import { SpecList } from "./SpecList";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";

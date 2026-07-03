@@ -1,4 +1,4 @@
-import { ComingSoon } from "@/components/features/shell/ComingSoon";
+import { ComingSoon } from "@/components/shell/ComingSoon";
 
 export default function PeriodicTablePage() {
   return (

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Bell, Settings, User } from "lucide-react";
-import { ApparatusIcon } from "@/components/features/inventory/ApparatusIcon";
+import { ApparatusIcon } from "@/components/chem/ApparatusIcon";
 import { cn } from "@/lib/utils";
 
 const NAV = [
