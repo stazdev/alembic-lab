@@ -1,12 +1,17 @@
-import { Activity } from "lucide-react";
+import { GraduationCap, Zap } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Pill } from "@/components/ui/Pill";
 
 const TOOLS = [
   {
-    name: "Kinetics",
-    desc: "Rate laws, Arrhenius, half-life & integrated rates",
-    icon: Activity,
+    name: "Redox half-reactions",
+    desc: "Ionic equations with charge & electron balancing (§2.2)",
+    icon: Zap,
+  },
+  {
+    name: "Guided tasks",
+    desc: "Objective-driven labs with scaffolds & auto-grading (§2.3)",
+    icon: GraduationCap,
   },
 ];
 
