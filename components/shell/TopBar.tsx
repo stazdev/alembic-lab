@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Bell, Settings, User } from "lucide-react";
 import { ApparatusIcon } from "@/components/chem/ApparatusIcon";
+import { NotificationsDrawer } from "./NotificationsDrawer";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -18,6 +20,7 @@ const NAV = [
 
 export function TopBar() {
   const pathname = usePathname();
+  const [notifOpen, setNotifOpen] = useState(false);
 
   return (
     <header className="flex items-center justify-between gap-4">
@@ -73,13 +76,14 @@ export function TopBar() {
           Settings
         </Link>
         <div className="relative">
-          <Link
-            href="/notifications"
+          <button
+            type="button"
+            onClick={() => setNotifOpen(true)}
             aria-label="Notifications"
             className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-pill border border-line bg-surface text-ink transition hover:bg-surface-2 active:scale-95"
           >
             <Bell className="h-[18px] w-[18px]" />
-          </Link>
+          </button>
           <span className="pointer-events-none absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-accent ring-2 ring-bg" />
         </div>
         <Link
@@ -90,6 +94,8 @@ export function TopBar() {
           <User className="h-[18px] w-[18px]" />
         </Link>
       </div>
+
+      <NotificationsDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
     </header>
   );
 }
