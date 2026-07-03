@@ -18,6 +18,21 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
+function PropRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center justify-between py-2">
+      <dt className="text-xs text-ink-2">{label}</dt>
+      <dd className="text-sm font-medium tabular-nums text-ink">{value}</dd>
+    </div>
+  );
+}
+
+const fmtVal = (v: number | null, unit?: string): string =>
+  v == null ? "—" : `${v}${unit ? ` ${unit}` : ""}`;
+
+const capitalize = (s: string): string =>
+  s.charAt(0).toUpperCase() + s.slice(1);
+
 /**
  * Slide-in detail drawer for a selected element: identity, key facts, electron
  * shells + configuration, and an interactive 3D Bohr atomic model. Closes on the
@@ -123,6 +138,40 @@ export function ElementDetail({
               <Fact label="Period" value={String(element.period)} />
               <Fact label="Block" value={`${element.block}-block`} />
               <Fact label="Valence e⁻" value={String(cfg.valence)} />
+            </div>
+
+            {/* Physical properties */}
+            <div className="mt-5 px-5">
+              <div className="text-[11px] font-medium uppercase tracking-wide text-ink-3">
+                Physical properties
+              </div>
+              <dl className="mt-2 divide-y divide-line rounded-ctrl bg-surface-2 px-3">
+                <PropRow
+                  label="Standard state"
+                  value={capitalize(element.standardState)}
+                />
+                <PropRow
+                  label="Electronegativity"
+                  value={fmtVal(element.electronegativity)}
+                />
+                <PropRow
+                  label="Atomic radius"
+                  value={fmtVal(element.atomicRadius, "pm")}
+                />
+                <PropRow
+                  label="Ionization energy"
+                  value={fmtVal(element.ionizationEnergy, "kJ/mol")}
+                />
+                <PropRow
+                  label="Melting point"
+                  value={fmtVal(element.meltingPoint, "K")}
+                />
+                <PropRow
+                  label="Boiling point"
+                  value={fmtVal(element.boilingPoint, "K")}
+                />
+                <PropRow label="Density" value={fmtVal(element.density, "g/cm³")} />
+              </dl>
             </div>
 
             {/* Electron shells */}

@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 
 interface ElementCellProps {
   el: ElementDatum;
+  fill: string;
   style?: CSSProperties;
   selected?: boolean;
   dimmed?: boolean;
+  note?: string;
   onHover: (el: ElementDatum | null) => void;
   onSelect: (el: ElementDatum) => void;
 }
@@ -21,9 +23,11 @@ interface ElementCellProps {
  */
 export function ElementCell({
   el,
+  fill,
   style,
   selected,
   dimmed,
+  note,
   onHover,
   onSelect,
 }: ElementCellProps) {
@@ -39,12 +43,15 @@ export function ElementCell({
             #{el.z} · {meta.label}
           </div>
           <div className="text-on-dark-2">{el.mass.toFixed(3)} g/mol</div>
+          {note && <div className="mt-0.5 text-on-dark">{note}</div>}
         </div>
       }
     >
       <button
         type="button"
-        style={{ ...style, backgroundColor: dimmed ? undefined : meta.fill }}
+        id={`ptable-el-${el.z}`}
+        data-z={el.z}
+        style={{ ...style, backgroundColor: dimmed ? undefined : fill }}
         onPointerEnter={() => onHover(el)}
         onPointerLeave={() => onHover(null)}
         onFocus={() => onHover(el)}

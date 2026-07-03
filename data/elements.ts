@@ -12,6 +12,9 @@
  * renderer (see `isFBlock`), with placeholder markers left at the La/Ac cells.
  */
 import { ATOMIC_MASS } from "./atomicMasses";
+import { ELEMENT_PROPERTIES, type ElementProperties } from "./elementProperties";
+
+export type { ElementProperties };
 
 export type ElementCategory =
   | "alkali-metal"
@@ -28,7 +31,7 @@ export type ElementCategory =
 
 export type Block = "s" | "p" | "d" | "f";
 
-export interface ElementDatum {
+export interface ElementDatum extends ElementProperties {
   z: number; // atomic number
   symbol: string;
   name: string;
@@ -37,6 +40,8 @@ export interface ElementDatum {
   period: number; // 1–7
   block: Block;
   mass: number; // g/mol, from the shared ATOMIC_MASS table
+  // ...plus electronegativity / atomicRadius / ionizationEnergy / meltingPoint /
+  // boilingPoint / density / standardState, merged from ELEMENT_PROPERTIES.
 }
 
 // [z, symbol, name, category, group, period, block]
@@ -173,6 +178,7 @@ export const ELEMENTS: ElementDatum[] = ROWS.map(
     period,
     block,
     mass: ATOMIC_MASS[symbol],
+    ...ELEMENT_PROPERTIES[z],
   }),
 );
 
