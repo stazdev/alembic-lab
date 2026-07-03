@@ -8,13 +8,15 @@
  */
 import { molarMass } from "@/lib/chemistry/stoichiometry";
 import { balanceEquation } from "@/lib/chemistry/balancer";
-import { pKaToKa, strongAcidPH, weakAcidPH } from "@/lib/chemistry/ph";
+import { pKaToKa, strongAcidPH, weakAcidPH, bufferPH } from "@/lib/chemistry/ph";
 import { reactionThermo } from "@/lib/chemistry/thermo";
 import { halfLife, activationEnergy } from "@/lib/chemistry/kinetics";
 import { solveIdeal, solveCombined } from "@/lib/chemistry/gasLaws";
 import { michaelisMenten, rateFraction } from "@/lib/chemistry/enzymeKinetics";
 import { standardCellPotential, nernst } from "@/lib/chemistry/electrochemistry";
 import { HALF_BY_ID } from "@/data/reductionPotentials";
+import { molarSolubility } from "@/lib/chemistry/equilibrium";
+import { redoxTitrationConcentration } from "@/lib/chemistry/redoxTitration";
 import { THERMO_BY_ID } from "@/data/thermoData";
 
 export type TaskTopic =
@@ -25,7 +27,9 @@ export type TaskTopic =
   | "Kinetics"
   | "Gas Laws"
   | "Enzyme Kinetics"
-  | "Electrochemistry";
+  | "Electrochemistry"
+  | "Equilibrium"
+  | "Titration";
 
 export type TaskDifficulty = "Intro" | "Core" | "Challenge";
 
@@ -454,6 +458,122 @@ export const TASKS: Task[] = [
       "Zinc (E° = −0.76 V) sits below Cu²⁺/Cu (+0.34 V), so Zn is oxidized and reduces Cu²⁺. Silver is not.",
     toolHref: "/reactions",
   },
+  {
+    id: "equil-ksp-agcl",
+    title: "Solubility from Ksp",
+    topic: "Equilibrium",
+    difficulty: "Core",
+    objectives: ["Relate Ksp to molar solubility for a 1:1 salt"],
+    prompt:
+      "The Ksp of AgCl is 1.8×10⁻¹⁰. What is its molar solubility in pure water?",
+    answer: {
+      kind: "numeric",
+      value: molarSolubility(1.8e-10, 1, 1),
+      unit: "mol/L",
+      tolerance: 1e-6,
+    },
+    hints: ["AgCl ⇌ Ag⁺ + Cl⁻, so Ksp = s².", "s = √Ksp."],
+    solution: "s = √(1.8×10⁻¹⁰) ≈ 1.34×10⁻⁵ mol/L.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "equil-ksp-caf2",
+    title: "Solubility of a 1:2 salt",
+    topic: "Equilibrium",
+    difficulty: "Challenge",
+    objectives: ["Handle stoichiometry inside a Ksp expression"],
+    prompt: "The Ksp of CaF₂ is 3.9×10⁻¹¹. What is its molar solubility?",
+    answer: {
+      kind: "numeric",
+      value: molarSolubility(3.9e-11, 1, 2),
+      unit: "mol/L",
+      tolerance: 1e-5,
+    },
+    hints: [
+      "CaF₂ ⇌ Ca²⁺ + 2F⁻, so Ksp = (s)(2s)² = 4s³.",
+      "s = ∛(Ksp / 4).",
+    ],
+    solution: "s = ∛(3.9×10⁻¹¹ / 4) ≈ 2.14×10⁻⁴ mol/L.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "equil-lechatelier",
+    title: "Maximizing ammonia yield",
+    topic: "Equilibrium",
+    difficulty: "Core",
+    objectives: ["Apply Le Chatelier's principle to shift an equilibrium"],
+    prompt:
+      "For N₂ + 3H₂ ⇌ 2NH₃ (ΔH < 0), which single change increases the equilibrium yield of NH₃?",
+    answer: {
+      kind: "choice",
+      options: [
+        "Increase the pressure",
+        "Increase the temperature",
+        "Add a catalyst",
+      ],
+      correctIndex: 0,
+    },
+    hints: [
+      "The product side has fewer moles of gas (2 vs 4).",
+      "Heat is a product of an exothermic reaction; a catalyst changes rate, not position.",
+    ],
+    solution:
+      "Higher pressure favors the side with fewer gas moles (products), raising NH₃ yield. Heating shifts an exothermic reaction back toward reactants, and a catalyst doesn't move the equilibrium position.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "ph-buffer",
+    title: "pH of an acetate buffer",
+    topic: "pH",
+    difficulty: "Core",
+    objectives: ["Apply the Henderson–Hasselbalch equation"],
+    prompt:
+      "A buffer contains 0.20 mol acetic acid and 0.10 mol sodium acetate (pKa = 4.76). What is its pH?",
+    answer: {
+      kind: "numeric",
+      value: bufferPH(4.76, 0.2, 0.1),
+      unit: "",
+      tolerance: 0.05,
+    },
+    hints: [
+      "pH = pKa + log([A⁻]/[HA]).",
+      "pH = 4.76 + log(0.10 / 0.20).",
+    ],
+    solution: "pH = 4.76 + log(0.10/0.20) = 4.76 − 0.30 = 4.46.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "titration-redox-fe",
+    title: "Iron by permanganate titration",
+    topic: "Titration",
+    difficulty: "Challenge",
+    objectives: ["Use electron balance to find an analyte concentration"],
+    prompt:
+      "A 25.00 mL sample of Fe²⁺ reaches the equivalence point with 20.00 mL of 0.0200 M KMnO₄ (MnO₄⁻ + 5Fe²⁺ + 8H⁺ → Mn²⁺ + 5Fe³⁺ + 4H₂O). What is [Fe²⁺]?",
+    given: [
+      { label: "KMnO₄", value: "20.00 mL, 0.0200 M" },
+      { label: "Fe²⁺ sample", value: "25.00 mL" },
+    ],
+    answer: {
+      kind: "numeric",
+      value: redoxTitrationConcentration({
+        cTitrant: 0.02,
+        vTitrant: 20,
+        nTitrant: 5,
+        vAnalyte: 25,
+        nAnalyte: 1,
+      }),
+      unit: "mol/L",
+      tolerance: 0.001,
+    },
+    hints: [
+      "Each MnO₄⁻ gains 5 e⁻; each Fe²⁺ loses 1 e⁻.",
+      "5 × mol MnO₄⁻ = 1 × mol Fe²⁺.",
+    ],
+    solution:
+      "mol MnO₄⁻ = 0.0200 × 0.02000 = 4.0×10⁻⁴; ×5 = 2.0×10⁻³ mol e⁻ = mol Fe²⁺. [Fe²⁺] = 2.0×10⁻³ / 0.02500 = 0.0800 M.",
+    toolHref: "/reactions",
+  },
 ];
 
 export const TASK_TOPICS: TaskTopic[] = [
@@ -465,4 +585,6 @@ export const TASK_TOPICS: TaskTopic[] = [
   "Gas Laws",
   "Enzyme Kinetics",
   "Electrochemistry",
+  "Equilibrium",
+  "Titration",
 ];

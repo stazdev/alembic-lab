@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { EquationBalancer } from "./EquationBalancer";
 import { RedoxBalancer } from "./RedoxBalancer";
+import { RedoxTitrationTool } from "./RedoxTitrationTool";
 import { StoichiometryTool } from "./StoichiometryTool";
 import { GasLawsTool } from "./GasLawsTool";
 import { PHTool } from "./PHTool";
+import { EquilibriumTool } from "./EquilibriumTool";
 import { ThermoTool } from "./ThermoTool";
 import { ElectrochemistryTool } from "./ElectrochemistryTool";
 import { KineticsTool } from "./KineticsTool";
@@ -15,9 +17,11 @@ import { SegmentedControl } from "@/components/ui/SegmentedControl";
 type Tool =
   | "balancer"
   | "redox"
+  | "redoxTitration"
   | "stoichiometry"
   | "gas"
   | "ph"
+  | "equilibrium"
   | "thermo"
   | "echem"
   | "kinetics"
@@ -26,9 +30,11 @@ type Tool =
 const TOOLS = [
   { value: "balancer" as const, label: "Balancer" },
   { value: "redox" as const, label: "Redox" },
+  { value: "redoxTitration" as const, label: "Redox Titration" },
   { value: "stoichiometry" as const, label: "Stoichiometry" },
   { value: "gas" as const, label: "Gas Laws" },
   { value: "ph" as const, label: "pH & Titration" },
+  { value: "equilibrium" as const, label: "Equilibrium" },
   { value: "thermo" as const, label: "Thermodynamics" },
   { value: "echem" as const, label: "Electrochemistry" },
   { value: "kinetics" as const, label: "Kinetics" },
@@ -52,9 +58,11 @@ export function ReactionsTools() {
 
       {tool === "balancer" && <EquationBalancer />}
       {tool === "redox" && <RedoxBalancer />}
+      {tool === "redoxTitration" && <RedoxTitrationTool />}
       {tool === "stoichiometry" && <StoichiometryTool />}
       {tool === "gas" && <GasLawsTool />}
       {tool === "ph" && <PHTool />}
+      {tool === "equilibrium" && <EquilibriumTool />}
       {tool === "thermo" && <ThermoTool />}
       {tool === "echem" && <ElectrochemistryTool />}
       {tool === "kinetics" && <KineticsTool />}
