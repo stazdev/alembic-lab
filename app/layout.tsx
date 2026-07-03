@@ -5,6 +5,7 @@ import "./globals.css";
 import "katex/dist/katex.min.css";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { TopBar } from "@/components/shell/TopBar";
+import { PrefsEffect } from "@/components/shell/PrefsEffect";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={manrope.variable}>
       <body>
+        <PrefsEffect />
         <TooltipProvider>
           {/* TopBar lives in the layout so it persists across navigations —
               that's what lets the active nav pill glide instead of snapping. */}

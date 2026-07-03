@@ -119,3 +119,13 @@ select:focus-visible {
     scroll-behavior: auto !important;
   }
 }
+
+/* Manual "reduce motion" preference (Settings) — mirrors the media query. */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
