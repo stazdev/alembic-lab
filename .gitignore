@@ -17,6 +17,10 @@
 /.next/
 /out/
 
+# rdkit wasm & kekulé editor — copied from node_modules by postinstall, not committed
+/public/rdkit/
+/public/kekule/
+
 # production
 /build
 

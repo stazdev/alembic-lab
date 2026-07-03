@@ -27,7 +27,9 @@ export function TaskDetail({ task }: { task: Task }) {
     let correct = false;
     if (task.answer.kind === "numeric") {
       const v = parseFloat(numeric);
-      correct = Number.isFinite(v) && Math.abs(v - task.answer.value) <= task.answer.tolerance;
+      correct =
+        Number.isFinite(v) &&
+        Math.abs(v - task.answer.value) <= task.answer.tolerance;
     } else {
       correct = selected === task.answer.correctIndex;
     }
@@ -43,7 +45,8 @@ export function TaskDetail({ task }: { task: Task }) {
     setShowSolution(false);
   }
 
-  const canCheck = task.answer.kind === "numeric" ? numeric.trim() !== "" : selected !== null;
+  const canCheck =
+    task.answer.kind === "numeric" ? numeric.trim() !== "" : selected !== null;
 
   return (
     <div>
@@ -51,7 +54,10 @@ export function TaskDetail({ task }: { task: Task }) {
         <Pill tone="soft">{task.topic}</Pill>
         <Pill tone="outline">{task.difficulty}</Pill>
         {completed && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium" style={{ color: OK }}>
+          <span
+            className="inline-flex items-center gap-1 text-xs font-medium"
+            style={{ color: OK }}
+          >
             <Check className="h-3.5 w-3.5" /> Completed
           </span>
         )}
@@ -73,19 +79,28 @@ export function TaskDetail({ task }: { task: Task }) {
       {task.given && (
         <div className="mt-3 flex flex-wrap gap-2">
           {task.given.map((g) => (
-            <span key={g.label} className="rounded-pill bg-surface-2 px-3 py-1 text-xs text-ink-2">
-              {g.label} = <span className="font-medium text-ink">{g.value}</span>
+            <span
+              key={g.label}
+              className="rounded-pill bg-surface-2 px-3 py-1 text-xs text-ink-2"
+            >
+              {g.label} ={" "}
+              <span className="font-medium text-ink">{g.value}</span>
             </span>
           ))}
         </div>
       )}
 
-      <p className="mt-4 rounded-ctrl bg-surface-2 p-4 text-sm leading-relaxed text-ink">{task.prompt}</p>
+      <p className="mt-4 rounded-ctrl bg-surface-2 p-4 text-sm leading-relaxed text-ink">
+        {task.prompt}
+      </p>
 
       {task.moleculeKey && (
         <div className="mt-4">
           <div className="relative h-64 overflow-hidden rounded-card border border-line bg-surface-2">
-            <Molecule3D moleculeKey={task.moleculeKey} representation="ball-stick" />
+            <Molecule3D
+              moleculeKey={task.moleculeKey}
+              representation="ball-stick"
+            />
             <div className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-[11px] text-ink-3">
               drag to rotate · scroll to zoom
             </div>
@@ -138,12 +153,18 @@ export function TaskDetail({ task }: { task: Task }) {
           Reset
         </Button>
         {result === true && (
-          <span className="inline-flex items-center gap-1 text-sm font-medium" style={{ color: OK }}>
+          <span
+            className="inline-flex items-center gap-1 text-sm font-medium"
+            style={{ color: OK }}
+          >
             <Check className="h-4 w-4" /> Correct!
           </span>
         )}
         {result === false && (
-          <span className="inline-flex items-center gap-1 text-sm font-medium" style={{ color: ERR }}>
+          <span
+            className="inline-flex items-center gap-1 text-sm font-medium"
+            style={{ color: ERR }}
+          >
             <X className="h-4 w-4" /> Not quite — try a hint.
           </span>
         )}
@@ -156,7 +177,11 @@ export function TaskDetail({ task }: { task: Task }) {
             Hints ({revealed}/{task.hints.length})
           </span>
           {revealed < task.hints.length && (
-            <Button variant="soft" size="sm" onClick={() => setRevealed((r) => r + 1)}>
+            <Button
+              variant="soft"
+              size="sm"
+              onClick={() => setRevealed((r) => r + 1)}
+            >
               <Lightbulb className="h-4 w-4" />
               {revealed === 0 ? "Hint" : "Next hint"}
             </Button>
@@ -165,7 +190,10 @@ export function TaskDetail({ task }: { task: Task }) {
         {revealed > 0 && (
           <ol className="mt-3 space-y-2">
             {task.hints.slice(0, revealed).map((h, i) => (
-              <li key={i} className="flex gap-2 rounded-ctrl bg-surface-2 p-3 text-sm text-ink-2">
+              <li
+                key={i}
+                className="flex gap-2 rounded-ctrl bg-surface-2 p-3 text-sm text-ink-2"
+              >
                 <span className="font-semibold text-ink">{i + 1}.</span>
                 {h}
               </li>
@@ -177,7 +205,11 @@ export function TaskDetail({ task }: { task: Task }) {
       {/* Solution */}
       <div className="mt-4">
         {!showSolution ? (
-          <Button variant="outline" size="sm" onClick={() => setShowSolution(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowSolution(true)}
+          >
             Show solution
           </Button>
         ) : (

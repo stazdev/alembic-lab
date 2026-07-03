@@ -13,6 +13,7 @@ interface Active {
   cid?: number;
   label: string;
   formula?: string;
+  smiles?: string;
 }
 
 export function MoleculesExplorer() {
@@ -20,6 +21,7 @@ export function MoleculesExplorer() {
     moleculeKey: "water",
     label: "Water",
     formula: "H2O",
+    smiles: "O",
   });
   const [query, setQuery] = useState("");
 
@@ -54,6 +56,7 @@ export function MoleculesExplorer() {
                     moleculeKey: m.key,
                     label: m.name,
                     formula: m.formula,
+                    smiles: m.smiles,
                   })
                 }
                 aria-pressed={isActive}
@@ -89,6 +92,7 @@ export function MoleculesExplorer() {
           moleculeKey={active.moleculeKey}
           name={active.name}
           cid={active.cid}
+          smiles={active.smiles}
         />
       </div>
     </div>

@@ -9,7 +9,11 @@ import { SpecList } from "./SpecList";
 import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { Pill } from "@/components/ui/Pill";
-import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/Popover";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/Popover";
 import { Vessel3D } from "@/components/features/apparatus3d/Vessel3D";
 import { is3DVessel } from "@/lib/three/vesselProfiles";
 import { cn } from "@/lib/utils";
@@ -75,7 +79,10 @@ export function ApparatusCard({ apparatus }: { apparatus: Apparatus }) {
           </Button>
           <Popover>
             <PopoverTrigger asChild>
-              <IconButton aria-label={`Details for ${apparatus.name}`} size="sm">
+              <IconButton
+                aria-label={`Details for ${apparatus.name}`}
+                size="sm"
+              >
                 <Info className="h-4 w-4" />
               </IconButton>
             </PopoverTrigger>
@@ -97,7 +104,9 @@ export function ApparatusCard({ apparatus }: { apparatus: Apparatus }) {
               )}
               <div className="mb-2 flex items-start justify-between gap-2">
                 <div>
-                  <h4 className="text-sm font-semibold text-ink">{apparatus.name}</h4>
+                  <h4 className="text-sm font-semibold text-ink">
+                    {apparatus.name}
+                  </h4>
                   <p className="text-xs text-ink-3">
                     {categoryLabel(apparatus.category)}
                   </p>

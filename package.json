@@ -8,12 +8,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "assets:copy": "mkdir -p public/rdkit public/kekule && cp -f node_modules/@rdkit/rdkit/dist/RDKit_minimal.js node_modules/@rdkit/rdkit/dist/RDKit_minimal.wasm public/rdkit/ && cp -f node_modules/kekule/dist/kekule.min.js public/kekule/ && cp -rf node_modules/kekule/dist/themes public/kekule/",
+    "postinstall": "npm run assets:copy || true",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@radix-ui/react-popover": "^1.1.18",
     "@radix-ui/react-tooltip": "^1.2.11",
+    "@rdkit/rdkit": "^2025.3.4-1.0.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@types/katex": "^0.16.8",
@@ -21,6 +24,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.42.2",
     "katex": "^0.17.0",
+    "kekule": "^1.0.4",
     "lucide-react": "^1.23.0",
     "next": "^16.2.10",
     "react": "^19.2.7",

@@ -6,7 +6,10 @@ import { useTasks } from "@/lib/stores/tasksStore";
 import { TaskCard } from "./TaskCard";
 import { TaskDetail } from "./TaskDetail";
 import { Card } from "@/components/ui/Card";
-import { SegmentedControl, type SegmentOption } from "@/components/ui/SegmentedControl";
+import {
+  SegmentedControl,
+  type SegmentOption,
+} from "@/components/ui/SegmentedControl";
 
 type Filter = TaskTopic | "all";
 
@@ -20,7 +23,8 @@ export function TasksView() {
   const [selectedId, setSelectedId] = useState(TASKS[0].id);
   const completedCount = useTasks((s) => s.completed.length);
 
-  const filtered = topic === "all" ? TASKS : TASKS.filter((t) => t.topic === topic);
+  const filtered =
+    topic === "all" ? TASKS : TASKS.filter((t) => t.topic === topic);
   const selected = TASKS.find((t) => t.id === selectedId) ?? TASKS[0];
 
   return (
@@ -36,7 +40,8 @@ export function TasksView() {
           />
         </div>
         <span className="shrink-0 text-xs text-ink-2">
-          <span className="font-semibold text-ink">{completedCount}</span> of {TASKS.length} complete
+          <span className="font-semibold text-ink">{completedCount}</span> of{" "}
+          {TASKS.length} complete
         </span>
       </div>
 

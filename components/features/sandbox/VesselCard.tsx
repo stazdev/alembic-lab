@@ -26,7 +26,10 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
   const iconKind = apparatus?.icon ?? "beaker";
   const volume = totalVolume(vessel.components);
   const fillFrac = volume / capacity;
-  const { appearance, pH } = resolveMixture(vessel.components, vessel.temperatureC);
+  const { appearance, pH } = resolveMixture(
+    vessel.components,
+    vessel.temperatureC,
+  );
 
   const selected = selectedId === vessel.id;
   const isSource = pourSourceId === vessel.id;
@@ -61,8 +64,11 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
       }}
       className={cn(
         "group relative flex cursor-pointer flex-col rounded-card border bg-surface p-3 transition",
-        selected && !isPourTarget && "border-accent-strong ring-2 ring-accent-strong/40",
-        isPourTarget && "border-dashed border-accent-strong ring-2 ring-accent-strong/40",
+        selected &&
+          !isPourTarget &&
+          "border-accent-strong ring-2 ring-accent-strong/40",
+        isPourTarget &&
+          "border-dashed border-accent-strong ring-2 ring-accent-strong/40",
         !selected && !isPourTarget && "border-line hover:border-line-strong",
       )}
     >

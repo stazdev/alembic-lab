@@ -30,7 +30,10 @@ export function ObservationLog() {
           reagents.
         </p>
       ) : (
-        <ul className="space-y-2 overflow-y-auto pr-1" style={{ maxHeight: 320 }}>
+        <ul
+          className="space-y-2 overflow-y-auto pr-1"
+          style={{ maxHeight: 320 }}
+        >
           <AnimatePresence initial={false}>
             {ordered.map((obs) => (
               <motion.li

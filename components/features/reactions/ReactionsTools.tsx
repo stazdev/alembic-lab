@@ -13,6 +13,8 @@ import { ElectrochemistryTool } from "./ElectrochemistryTool";
 import { KineticsTool } from "./KineticsTool";
 import { EnzymeKineticsTool } from "./EnzymeKineticsTool";
 import { FunctionalGroupsTool } from "./FunctionalGroupsTool";
+import { MechanismViewer } from "./MechanismViewer";
+import { StructureEditor } from "./StructureEditor";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +30,9 @@ type ToolId =
   | "echem"
   | "kinetics"
   | "enzyme"
-  | "functionalGroups";
+  | "functionalGroups"
+  | "mechanisms"
+  | "sketchpad";
 
 const TOOL_COMPONENTS: Record<ToolId, ReactNode> = {
   balancer: <EquationBalancer />,
@@ -43,6 +47,8 @@ const TOOL_COMPONENTS: Record<ToolId, ReactNode> = {
   kinetics: <KineticsTool />,
   enzyme: <EnzymeKineticsTool />,
   functionalGroups: <FunctionalGroupsTool />,
+  mechanisms: <MechanismViewer />,
+  sketchpad: <StructureEditor />,
 };
 
 interface Category {
@@ -98,7 +104,11 @@ const CATEGORIES: Category[] = [
   {
     id: "organic",
     label: "Organic",
-    tools: [{ value: "functionalGroups", label: "Functional-group tests" }],
+    tools: [
+      { value: "functionalGroups", label: "Functional-group tests" },
+      { value: "mechanisms", label: "Mechanisms" },
+      { value: "sketchpad", label: "Sketchpad" },
+    ],
   },
 ];
 

@@ -78,7 +78,9 @@ export function BenchTray() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold text-on-dark">Your Bench</h2>
-          <p className="text-xs text-on-dark-2">Apparatus staged for the sandbox</p>
+          <p className="text-xs text-on-dark-2">
+            Apparatus staged for the sandbox
+          </p>
         </div>
         {total > 0 && (
           <Pill tone="accent">
