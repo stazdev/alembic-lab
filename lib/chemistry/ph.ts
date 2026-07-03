@@ -24,19 +24,37 @@ export function strongBasePH(c: number): number {
   return 14 + Math.log10(oh);
 }
 
-/** Weak acid via the full quadratic Ka = x²/(C−x). */
+/**
+ * Weak acid from the charge balance [H⁺] = [A⁻] + [OH⁻], solved numerically.
+ * Reduces to the familiar Ka = x²/(C−x) quadratic at ordinary concentrations,
+ * but stays correct for very dilute acids where water autoionization dominates
+ * (the bare quadratic wrongly reports a 10⁻⁹ M acid as basic).
+ */
 export function weakAcidPH(c: number, ka: number): number {
-  const h = (-ka + Math.sqrt(ka * ka + 4 * ka * c)) / 2;
-  return -Math.log10(h);
+  return solvePH((ph) => {
+    const h = Math.pow(10, -ph);
+    return h - (c * ka) / (ka + h) - KW / h;
+  });
 }
 
+/** Weak base, dual of {@link weakAcidPH}: solve for pOH via [OH⁻] = [BH⁺] + [H⁺]. */
 export function weakBasePH(c: number, kb: number): number {
-  const oh = (-kb + Math.sqrt(kb * kb + 4 * kb * c)) / 2;
-  return 14 + Math.log10(oh);
+  const pOH = solvePH((poh) => {
+    const oh = Math.pow(10, -poh);
+    return oh - (c * kb) / (kb + oh) - KW / oh;
+  });
+  return 14 - pOH;
 }
 
-/** Henderson–Hasselbalch buffer. */
+/**
+ * Henderson–Hasselbalch buffer. Valid only when both components are present
+ * (roughly 0.1 < ratio < 10); guarded against a zero component so it returns a
+ * clamped bound instead of ±Infinity.
+ */
 export function bufferPH(pKa: number, amountHA: number, amountA: number): number {
+  if (amountHA <= 0 && amountA <= 0) return 7;
+  if (amountHA <= 0) return 14; // no weak acid left — H–H diverges basic
+  if (amountA <= 0) return 0; //  no conjugate base — H–H diverges acidic
   return pKa + Math.log10(amountA / amountHA);
 }
 

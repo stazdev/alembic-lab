@@ -44,15 +44,8 @@ const PINK = "#e85c8a";
 const BOILING_POINT_C = 99.5;
 const KB_AMMONIA = pKaToKa(4.75); // ≈ 1.8×10⁻⁵
 
-/** Sandbox reagent concentrations (mol/L) — lab-strength so effects are visible. */
-const CONC: Record<string, number> = {
-  hcl: 1, naoh: 1, h2so4: 1, ammonia: 1,
-  na2co3: 0.5, caco3: 0.5,
-  cuso4: 0.5, agno3: 0.5, nacl: 0.5, fecl3: 0.5,
-  pb_no3: 0.5, ki: 0.5, bacl2: 0.5, cocl2: 0.5,
-  kmno4: 0.1,
-  na: 2, ca: 2, mg: 2, zn: 2, fe: 2, cu: 2,
-};
+/** Fallback molarity for any reagent that declares no concentrationM. */
+const DEFAULT_CONC = 0.5;
 
 interface Reaction {
   id: string;
@@ -113,7 +106,8 @@ const REACTIONS: Reaction[] = [
     equation: "2Na + 2H₂O → 2NaOH + H₂↑",
     text: "Sodium skates across the surface, fizzing off hydrogen and turning the water strongly alkaline.",
     kind: "gas",
-    deltaHkJ: -184,
+    // Hess from thermoData.ts for the reaction AS WRITTEN (2 mol): 2·NaOH(aq) − 2·H₂O(l).
+    deltaHkJ: -368.6,
     gas: true,
   },
   {
@@ -231,7 +225,7 @@ export function totalVolume(components: MixtureComponent[]): number {
 }
 
 const molesFromMl = (id: string, amountMl: number): number =>
-  (amountMl / 1000) * (CONC[id] ?? 0.5);
+  (amountMl / 1000) * (getReagent(id)?.concentrationM ?? DEFAULT_CONC);
 
 function clampPH(p: number): number {
   return Math.max(0, Math.min(14, p));
