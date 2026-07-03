@@ -11,6 +11,10 @@ import { balanceEquation } from "@/lib/chemistry/balancer";
 import { pKaToKa, strongAcidPH, weakAcidPH } from "@/lib/chemistry/ph";
 import { reactionThermo } from "@/lib/chemistry/thermo";
 import { halfLife, activationEnergy } from "@/lib/chemistry/kinetics";
+import { solveIdeal, solveCombined } from "@/lib/chemistry/gasLaws";
+import { michaelisMenten, rateFraction } from "@/lib/chemistry/enzymeKinetics";
+import { standardCellPotential, nernst } from "@/lib/chemistry/electrochemistry";
+import { HALF_BY_ID } from "@/data/reductionPotentials";
 import { THERMO_BY_ID } from "@/data/thermoData";
 
 export type TaskTopic =
@@ -18,7 +22,10 @@ export type TaskTopic =
   | "Stoichiometry"
   | "pH"
   | "Thermodynamics"
-  | "Kinetics";
+  | "Kinetics"
+  | "Gas Laws"
+  | "Enzyme Kinetics"
+  | "Electrochemistry";
 
 export type TaskDifficulty = "Intro" | "Core" | "Challenge";
 
@@ -52,6 +59,14 @@ const coeff = (reactants: string[], products: string[], index: number): number =
 const term = (id: string, c: number) => {
   const s = THERMO_BY_ID[id];
   return { dHf: s.dHf, s: s.s, coeff: c };
+};
+const idealVal = (known: Parameters<typeof solveIdeal>[0]): number => {
+  const r = solveIdeal(known);
+  return r.ok ? r.value : NaN;
+};
+const combinedVal = (known: Parameters<typeof solveCombined>[0]): number => {
+  const r = solveCombined(known);
+  return r.ok ? r.value : NaN;
 };
 
 const haber = reactionThermo(
@@ -250,6 +265,195 @@ export const TASKS: Task[] = [
     solution: "Solving gives Eₐ ≈ 54 kJ/mol.",
     toolHref: "/reactions",
   },
+  {
+    id: "gas-stp-volume",
+    title: "Molar volume at STP",
+    topic: "Gas Laws",
+    difficulty: "Intro",
+    objectives: ["Apply PV = nRT", "Recall the molar volume of a gas at STP"],
+    prompt:
+      "What volume does 1.00 mol of an ideal gas occupy at STP (P = 1.00 atm, T = 273.15 K)?",
+    answer: {
+      kind: "numeric",
+      value: idealVal({ P: 1, n: 1, T: 273.15 }),
+      unit: "L",
+      tolerance: 0.1,
+    },
+    hints: [
+      "Rearrange PV = nRT to V = nRT/P.",
+      "Use R = 0.08206 L·atm·mol⁻¹·K⁻¹.",
+    ],
+    solution: "V = (1.00)(0.08206)(273.15) / 1.00 ≈ 22.41 L.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "gas-charles",
+    title: "Charles's law — heating a gas",
+    topic: "Gas Laws",
+    difficulty: "Core",
+    objectives: ["Use the combined gas law at constant pressure"],
+    prompt:
+      "A 2.0 L sample of gas at 300 K is heated to 600 K at constant pressure. What is its new volume?",
+    given: [
+      { label: "V₁", value: "2.0 L" },
+      { label: "T₁ → T₂", value: "300 K → 600 K" },
+    ],
+    answer: {
+      kind: "numeric",
+      value: combinedVal({ P1: 1, V1: 2, T1: 300, P2: 1, T2: 600 }),
+      unit: "L",
+      tolerance: 0.05,
+    },
+    hints: [
+      "At constant pressure, V₁/T₁ = V₂/T₂.",
+      "V₂ = V₁ × T₂/T₁ = 2.0 × 600/300.",
+    ],
+    solution: "V₂ = 2.0 × (600 / 300) = 4.0 L.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "gas-boyle",
+    title: "Boyle's law — compressing a gas",
+    topic: "Gas Laws",
+    difficulty: "Core",
+    objectives: ["Use the combined gas law at constant temperature"],
+    prompt:
+      "A gas occupies 4.0 L at 1.0 atm. Compressed to 1.0 L at constant temperature, what is its new pressure?",
+    answer: {
+      kind: "numeric",
+      value: combinedVal({ P1: 1, V1: 4, T1: 300, V2: 1, T2: 300 }),
+      unit: "atm",
+      tolerance: 0.05,
+    },
+    hints: [
+      "At constant temperature, P₁V₁ = P₂V₂.",
+      "P₂ = P₁ × V₁/V₂ = 1.0 × 4.0/1.0.",
+    ],
+    solution: "P₂ = 1.0 × (4.0 / 1.0) = 4.0 atm.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "enzyme-mm-rate",
+    title: "Michaelis–Menten rate",
+    topic: "Enzyme Kinetics",
+    difficulty: "Core",
+    objectives: ["Apply the Michaelis–Menten equation"],
+    prompt:
+      "An enzyme has Vmax = 100 µmol/min and Km = 5.0 mM. What is the reaction rate at [S] = 15 mM?",
+    given: [
+      { label: "Vmax", value: "100 µmol/min" },
+      { label: "Km", value: "5.0 mM" },
+      { label: "[S]", value: "15 mM" },
+    ],
+    answer: {
+      kind: "numeric",
+      value: michaelisMenten(100, 5, 15),
+      unit: "µmol/min",
+      tolerance: 0.5,
+    },
+    hints: [
+      "v = Vmax·[S] / (Km + [S]).",
+      "v = 100 × 15 / (5 + 15) = 1500 / 20.",
+    ],
+    solution: "v = 100 × 15 / (5 + 15) = 75 µmol/min.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "enzyme-km-half",
+    title: "The meaning of Km",
+    topic: "Enzyme Kinetics",
+    difficulty: "Intro",
+    objectives: ["Interpret Km as the half-saturation constant"],
+    prompt:
+      "For an enzyme with Km = 4.0 mM, at what substrate concentration is the rate exactly half of Vmax?",
+    answer: { kind: "numeric", value: 4.0, unit: "mM", tolerance: 0.01 },
+    hints: [
+      "Set v = ½·Vmax in the Michaelis–Menten equation and solve for [S].",
+      "½ = [S] / (Km + [S]) ⟹ [S] = Km.",
+    ],
+    solution: "At v = ½Vmax, [S] = Km = 4.0 mM — that is what Km means.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "enzyme-fraction",
+    title: "Fraction of Vmax",
+    topic: "Enzyme Kinetics",
+    difficulty: "Core",
+    objectives: ["Relate [S]/Km to the fraction of Vmax reached"],
+    prompt:
+      "At a substrate concentration equal to three times Km, what fraction of Vmax is the reaction rate?",
+    answer: {
+      kind: "numeric",
+      value: rateFraction(1, 3),
+      unit: "",
+      tolerance: 0.01,
+    },
+    hints: ["v/Vmax = [S] / (Km + [S]).", "With [S] = 3·Km: 3 / (1 + 3)."],
+    solution: "v/Vmax = 3/(1+3) = 0.75, i.e. 75 % of Vmax.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "echem-daniell",
+    title: "Standard cell potential",
+    topic: "Electrochemistry",
+    difficulty: "Core",
+    objectives: ["Combine standard reduction potentials into E°cell"],
+    prompt:
+      "A galvanic cell pairs a Cu²⁺/Cu cathode (E° = +0.34 V) with a Zn²⁺/Zn anode (E° = −0.76 V). What is E°cell?",
+    answer: {
+      kind: "numeric",
+      value: standardCellPotential(HALF_BY_ID.Cu.E0, HALF_BY_ID.Zn.E0),
+      unit: "V",
+      tolerance: 0.01,
+    },
+    hints: [
+      "E°cell = E°(cathode) − E°(anode).",
+      "E°cell = 0.34 − (−0.76).",
+    ],
+    solution: "E°cell = 0.34 − (−0.76) = 1.10 V.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "echem-nernst",
+    title: "Nernst equation",
+    topic: "Electrochemistry",
+    difficulty: "Challenge",
+    objectives: ["Apply the Nernst equation away from standard conditions"],
+    prompt:
+      "For the Daniell cell (E° = 1.10 V, n = 2) at 25 °C, what is the cell potential when Q = 100?",
+    answer: {
+      kind: "numeric",
+      value: nernst(1.1, 2, 100, 298.15),
+      unit: "V",
+      tolerance: 0.005,
+    },
+    hints: [
+      "E = E° − (RT/nF)·ln Q; at 25 °C, that is E° − (0.0592/n)·log Q.",
+      "E = 1.10 − (0.0592/2)·log(100).",
+    ],
+    solution: "E = 1.10 − (0.0592/2)(2) = 1.10 − 0.0592 ≈ 1.04 V.",
+    toolHref: "/reactions",
+  },
+  {
+    id: "echem-direction",
+    title: "Which metal is the reducing agent?",
+    topic: "Electrochemistry",
+    difficulty: "Intro",
+    objectives: ["Use reduction potentials to predict a spontaneous reaction"],
+    prompt: "Which metal will spontaneously reduce Cu²⁺ to Cu — zinc or silver?",
+    answer: {
+      kind: "choice",
+      options: ["Zinc", "Silver"],
+      correctIndex: HALF_BY_ID.Zn.E0 < HALF_BY_ID.Cu.E0 ? 0 : 1,
+    },
+    hints: [
+      "A metal reduces an ion only if its own reduction potential is lower.",
+      "E°: Zn²⁺/Zn = −0.76 V, Ag⁺/Ag = +0.80 V, Cu²⁺/Cu = +0.34 V.",
+    ],
+    solution:
+      "Zinc (E° = −0.76 V) sits below Cu²⁺/Cu (+0.34 V), so Zn is oxidized and reduces Cu²⁺. Silver is not.",
+    toolHref: "/reactions",
+  },
 ];
 
 export const TASK_TOPICS: TaskTopic[] = [
@@ -258,4 +462,7 @@ export const TASK_TOPICS: TaskTopic[] = [
   "pH",
   "Thermodynamics",
   "Kinetics",
+  "Gas Laws",
+  "Enzyme Kinetics",
+  "Electrochemistry",
 ];
