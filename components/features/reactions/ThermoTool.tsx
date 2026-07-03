@@ -11,6 +11,7 @@ import {
 } from "@/lib/chemistry/thermo";
 import { THERMO_BY_ID, THERMO_SPECIES, type ThermoSpecies } from "@/data/thermoData";
 import { FormulaText } from "@/components/chem/FormulaText";
+import { ChemEquation, type ChemTerm } from "@/components/chem/ChemEquation";
 import { Card } from "@/components/ui/Card";
 import { Field } from "@/components/ui/Field";
 import { NumberStepper } from "@/components/ui/NumberStepper";
@@ -106,6 +107,11 @@ interface Row {
   speciesId: string;
   coeff: number;
 }
+
+const rowToTerm = (r: Row): ChemTerm => {
+  const s = THERMO_BY_ID[r.speciesId];
+  return { coeff: r.coeff, formula: s.formula, state: s.state };
+};
 
 interface Preset {
   name: string;
@@ -238,6 +244,14 @@ function ReactionPanel() {
           <div className="mb-3">
             <SpontaneityBadge spontaneous={result.spontaneous} />
           </div>
+          {reactants.length > 0 && products.length > 0 && (
+            <div className="mb-3 text-sm text-ink">
+              <ChemEquation
+                reactants={reactants.map(rowToTerm)}
+                products={products.map(rowToTerm)}
+              />
+            </div>
+          )}
           <div className="flex flex-wrap gap-x-8 gap-y-3">
             <Stat label="ΔH°rxn" value={f1(result.dH)} unit="kJ/mol" />
             <Stat label="ΔS°rxn" value={f1(result.dS)} unit="J/(mol·K)" />
