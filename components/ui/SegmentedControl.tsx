@@ -87,7 +87,7 @@ export function SegmentedControl<T extends string>({
             onClick={() => onChange(option.value)}
             onKeyDown={(event) => onKeyDown(event, index)}
             className={cn(
-              "relative rounded-pill px-4 py-2 text-sm font-medium transition-colors",
+              "relative shrink-0 whitespace-nowrap rounded-pill px-4 py-2 text-sm font-medium transition-colors",
               active ? "text-ink" : "text-ink-2 hover:text-ink",
             )}
           >

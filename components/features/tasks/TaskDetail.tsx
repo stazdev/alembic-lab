@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Check, Lightbulb, RotateCcw, X } from "lucide-react";
 import type { Task } from "@/data/tasks";
 import { useTasks } from "@/lib/stores/tasksStore";
+import { Molecule3D } from "@/components/chem/Molecule3D";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Pill } from "@/components/ui/Pill";
@@ -80,6 +81,17 @@ export function TaskDetail({ task }: { task: Task }) {
       )}
 
       <p className="mt-4 rounded-ctrl bg-surface-2 p-4 text-sm leading-relaxed text-ink">{task.prompt}</p>
+
+      {task.moleculeKey && (
+        <div className="mt-4">
+          <div className="relative h-64 overflow-hidden rounded-card border border-line bg-surface-2">
+            <Molecule3D moleculeKey={task.moleculeKey} representation="ball-stick" />
+            <div className="pointer-events-none absolute inset-x-0 bottom-2 text-center text-[11px] text-ink-3">
+              drag to rotate · scroll to zoom
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Answer */}
       {task.answer.kind === "numeric" ? (

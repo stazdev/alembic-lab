@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Molecule3D } from "./Molecule3D";
-import type { Representation } from "./MoleculeScene";
+import { Molecule3D } from "@/components/chem/Molecule3D";
+import type { Representation } from "@/components/chem/MoleculeScene";
 
 const REPS: { key: Representation; label: string }[] = [
   { key: "ball-stick", label: "Ball & stick" },

@@ -29,7 +29,9 @@ export type TaskTopic =
   | "Enzyme Kinetics"
   | "Electrochemistry"
   | "Equilibrium"
-  | "Titration";
+  | "Titration"
+  | "Organic"
+  | "Biochemistry";
 
 export type TaskDifficulty = "Intro" | "Core" | "Challenge";
 
@@ -44,6 +46,8 @@ export interface Task {
   difficulty: TaskDifficulty;
   objectives: string[];
   prompt: string;
+  /** Optional bundled molecule (public/structures/<key>.sdf) shown in a 3D viewer. */
+  moleculeKey?: string;
   given?: { label: string; value: string }[];
   answer: TaskAnswer;
   hints: string[];
@@ -574,6 +578,145 @@ export const TASKS: Task[] = [
       "mol MnO₄⁻ = 0.0200 × 0.02000 = 4.0×10⁻⁴; ×5 = 2.0×10⁻³ mol e⁻ = mol Fe²⁺. [Fe²⁺] = 2.0×10⁻³ / 0.02500 = 0.0800 M.",
     toolHref: "/reactions",
   },
+  {
+    id: "org-ethanol-fg",
+    title: "Functional group of ethanol",
+    topic: "Organic",
+    difficulty: "Intro",
+    objectives: ["Recognize a functional group from a 3D structure"],
+    prompt: "Rotate the structure of ethanol. Which functional group does it contain?",
+    moleculeKey: "ethanol",
+    answer: {
+      kind: "choice",
+      options: ["Hydroxyl (–OH)", "Carbonyl (C=O)", "Carboxyl (–COOH)", "Amino (–NH₂)"],
+      correctIndex: 0,
+    },
+    hints: [
+      "Look for an oxygen bonded to both a carbon and a hydrogen.",
+      "The –OH group defines an alcohol.",
+    ],
+    solution:
+      "Ethanol (CH₃CH₂OH) contains a hydroxyl (–OH) group, making it an alcohol.",
+    toolHref: "/molecules",
+  },
+  {
+    id: "org-acetic-fg",
+    title: "Functional group of acetic acid",
+    topic: "Organic",
+    difficulty: "Core",
+    objectives: ["Distinguish a carboxyl group from other oxygen groups"],
+    prompt: "Examine acetic acid. Which functional group is present?",
+    moleculeKey: "acetic-acid",
+    answer: {
+      kind: "choice",
+      options: ["Hydroxyl (–OH)", "Ketone (C=O)", "Carboxyl (–COOH)", "Ester (–COO–)"],
+      correctIndex: 2,
+    },
+    hints: [
+      "Find a carbon double-bonded to one oxygen and single-bonded to an –OH.",
+      "That C(=O)–OH pattern is the carboxyl group.",
+    ],
+    solution:
+      "Acetic acid (CH₃COOH) has a carboxyl (–COOH) group — the defining group of carboxylic acids.",
+    toolHref: "/molecules",
+  },
+  {
+    id: "org-acetone-fg",
+    title: "Functional group of acetone",
+    topic: "Organic",
+    difficulty: "Core",
+    objectives: ["Identify a ketone carbonyl"],
+    prompt: "Acetone is shown. Which functional group does it contain?",
+    moleculeKey: "acetone",
+    answer: {
+      kind: "choice",
+      options: ["Aldehyde", "Ketone", "Carboxylic acid", "Alcohol"],
+      correctIndex: 1,
+    },
+    hints: [
+      "Locate the C=O carbon and see what is attached on each side.",
+      "A carbonyl flanked by two carbons is a ketone.",
+    ],
+    solution:
+      "Acetone ((CH₃)₂C=O) has a carbonyl carbon bonded to two other carbons — a ketone.",
+    toolHref: "/molecules",
+  },
+  {
+    id: "org-benzene-class",
+    title: "Classify benzene",
+    topic: "Organic",
+    difficulty: "Intro",
+    objectives: ["Recognize an aromatic ring"],
+    prompt: "What class of hydrocarbon is the molecule shown (benzene)?",
+    moleculeKey: "benzene",
+    answer: {
+      kind: "choice",
+      options: ["Alkane", "Alkene", "Aromatic ring", "Alcohol"],
+      correctIndex: 2,
+    },
+    hints: [
+      "Note the flat six-membered carbon ring with delocalized bonding.",
+      "C₆H₆ is the archetypal aromatic compound.",
+    ],
+    solution:
+      "Benzene (C₆H₆) is a planar six-membered ring with delocalized π electrons — an aromatic hydrocarbon.",
+    toolHref: "/molecules",
+  },
+  {
+    id: "org-glucose-carbons",
+    title: "Count the carbons in glucose",
+    topic: "Organic",
+    difficulty: "Intro",
+    objectives: ["Read atom counts from a 3D structure"],
+    prompt: "How many carbon atoms are in the glucose molecule shown?",
+    moleculeKey: "glucose",
+    answer: { kind: "numeric", value: 6, unit: "", tolerance: 0 },
+    hints: ["Glucose is a hexose sugar.", "Its formula is C₆H₁₂O₆."],
+    solution: "Glucose is C₆H₁₂O₆ — six carbon atoms.",
+    toolHref: "/molecules",
+  },
+  {
+    id: "bio-glucose-class",
+    title: "Classify glucose",
+    topic: "Biochemistry",
+    difficulty: "Intro",
+    objectives: ["Place a sugar in its biomolecule class"],
+    prompt: "Glucose is shown. Which class of biomolecule does it belong to?",
+    moleculeKey: "glucose",
+    answer: {
+      kind: "choice",
+      options: ["Monosaccharide", "Amino acid", "Fatty acid", "Nucleotide"],
+      correctIndex: 0,
+    },
+    hints: [
+      "It is a single sugar unit, not a polymer.",
+      "Simple sugars are monosaccharides.",
+    ],
+    solution:
+      "Glucose is a single six-carbon sugar — a monosaccharide, the monomer of carbohydrates.",
+    toolHref: "/molecules",
+  },
+  {
+    id: "bio-caffeine",
+    title: "Identify caffeine",
+    topic: "Biochemistry",
+    difficulty: "Core",
+    objectives: ["Recognize a purine alkaloid"],
+    prompt: "The molecule shown is caffeine. Which description fits it best?",
+    moleculeKey: "caffeine",
+    answer: {
+      kind: "choice",
+      options: ["Purine alkaloid (stimulant)", "Carbohydrate", "Lipid", "Protein"],
+      correctIndex: 0,
+    },
+    hints: [
+      "Note the fused nitrogen-containing double ring.",
+      "Caffeine is built on the purine skeleton.",
+    ],
+    solution:
+      "Caffeine is a purine alkaloid — a nitrogen-rich stimulant based on the fused purine ring system.",
+    toolHref: "/molecules",
+  },
 ];
 
 export const TASK_TOPICS: TaskTopic[] = [
@@ -587,4 +730,6 @@ export const TASK_TOPICS: TaskTopic[] = [
   "Electrochemistry",
   "Equilibrium",
   "Titration",
+  "Organic",
+  "Biochemistry",
 ];

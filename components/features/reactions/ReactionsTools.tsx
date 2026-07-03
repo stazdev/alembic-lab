@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { EquationBalancer } from "./EquationBalancer";
 import { RedoxBalancer } from "./RedoxBalancer";
 import { RedoxTitrationTool } from "./RedoxTitrationTool";
@@ -13,8 +13,9 @@ import { ElectrochemistryTool } from "./ElectrochemistryTool";
 import { KineticsTool } from "./KineticsTool";
 import { EnzymeKineticsTool } from "./EnzymeKineticsTool";
 import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { cn } from "@/lib/utils";
 
-type Tool =
+type ToolId =
   | "balancer"
   | "redox"
   | "redoxTitration"
@@ -27,46 +28,123 @@ type Tool =
   | "kinetics"
   | "enzyme";
 
-const TOOLS = [
-  { value: "balancer" as const, label: "Balancer" },
-  { value: "redox" as const, label: "Redox" },
-  { value: "redoxTitration" as const, label: "Redox Titration" },
-  { value: "stoichiometry" as const, label: "Stoichiometry" },
-  { value: "gas" as const, label: "Gas Laws" },
-  { value: "ph" as const, label: "pH & Titration" },
-  { value: "equilibrium" as const, label: "Equilibrium" },
-  { value: "thermo" as const, label: "Thermodynamics" },
-  { value: "echem" as const, label: "Electrochemistry" },
-  { value: "kinetics" as const, label: "Kinetics" },
-  { value: "enzyme" as const, label: "Enzyme Kinetics" },
+const TOOL_COMPONENTS: Record<ToolId, ReactNode> = {
+  balancer: <EquationBalancer />,
+  redox: <RedoxBalancer />,
+  redoxTitration: <RedoxTitrationTool />,
+  stoichiometry: <StoichiometryTool />,
+  gas: <GasLawsTool />,
+  ph: <PHTool />,
+  equilibrium: <EquilibriumTool />,
+  thermo: <ThermoTool />,
+  echem: <ElectrochemistryTool />,
+  kinetics: <KineticsTool />,
+  enzyme: <EnzymeKineticsTool />,
+};
+
+interface Category {
+  id: string;
+  label: string;
+  tools: { value: ToolId; label: string }[];
+}
+
+// Two-level navigation: broad category up top, related tools beneath — keeps the
+// tab bar readable now that there are eleven tools.
+const CATEGORIES: Category[] = [
+  {
+    id: "balancing",
+    label: "Balancing",
+    tools: [
+      { value: "balancer", label: "Molecular" },
+      { value: "redox", label: "Redox" },
+    ],
+  },
+  {
+    id: "stoichiometry",
+    label: "Stoichiometry",
+    tools: [
+      { value: "stoichiometry", label: "Stoichiometry" },
+      { value: "gas", label: "Gas Laws" },
+    ],
+  },
+  {
+    id: "solutions",
+    label: "Solutions & Equilibria",
+    tools: [
+      { value: "ph", label: "pH & Titration" },
+      { value: "equilibrium", label: "Equilibrium" },
+      { value: "redoxTitration", label: "Redox Titration" },
+    ],
+  },
+  {
+    id: "energetics",
+    label: "Energetics",
+    tools: [
+      { value: "thermo", label: "Thermodynamics" },
+      { value: "echem", label: "Electrochemistry" },
+    ],
+  },
+  {
+    id: "kinetics",
+    label: "Kinetics",
+    tools: [
+      { value: "kinetics", label: "Rate laws" },
+      { value: "enzyme", label: "Enzymes" },
+    ],
+  },
 ];
 
+const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c.id, label: c.label }));
+
 export function ReactionsTools() {
-  const [tool, setTool] = useState<Tool>("balancer");
+  const [categoryId, setCategoryId] = useState(CATEGORIES[0].id);
+  const [toolId, setToolId] = useState<ToolId>(CATEGORIES[0].tools[0].value);
+
+  const category = CATEGORIES.find((c) => c.id === categoryId) ?? CATEGORIES[0];
+  const activeTool = category.tools.some((t) => t.value === toolId)
+    ? toolId
+    : category.tools[0].value;
+
+  function selectCategory(id: string) {
+    setCategoryId(id);
+    const cat = CATEGORIES.find((c) => c.id === id);
+    if (cat) setToolId(cat.tools[0].value);
+  }
 
   return (
     <div>
-      <div className="mb-6 -mx-1 overflow-x-auto px-1 pb-1">
+      <div className="-mx-1 overflow-x-auto px-1 pb-1">
         <SegmentedControl
-          layoutId="reactions-tool"
-          aria-label="Select a tool"
-          options={TOOLS}
-          value={tool}
-          onChange={setTool}
+          layoutId="reactions-category"
+          aria-label="Tool category"
+          options={CATEGORY_OPTIONS}
+          value={categoryId}
+          onChange={selectCategory}
         />
       </div>
 
-      {tool === "balancer" && <EquationBalancer />}
-      {tool === "redox" && <RedoxBalancer />}
-      {tool === "redoxTitration" && <RedoxTitrationTool />}
-      {tool === "stoichiometry" && <StoichiometryTool />}
-      {tool === "gas" && <GasLawsTool />}
-      {tool === "ph" && <PHTool />}
-      {tool === "equilibrium" && <EquilibriumTool />}
-      {tool === "thermo" && <ThermoTool />}
-      {tool === "echem" && <ElectrochemistryTool />}
-      {tool === "kinetics" && <KineticsTool />}
-      {tool === "enzyme" && <EnzymeKineticsTool />}
+      {category.tools.length > 1 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {category.tools.map((t) => (
+            <button
+              key={t.value}
+              type="button"
+              onClick={() => setToolId(t.value)}
+              aria-pressed={activeTool === t.value}
+              className={cn(
+                "rounded-pill px-3.5 py-1.5 text-sm font-medium transition",
+                activeTool === t.value
+                  ? "bg-ink text-on-dark"
+                  : "border border-line bg-surface text-ink-2 hover:text-ink",
+              )}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-6">{TOOL_COMPONENTS[activeTool]}</div>
     </div>
   );
 }
