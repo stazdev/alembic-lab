@@ -9,6 +9,7 @@ import { ReagentShelf } from "./ReagentShelf";
 import { ObservationLog } from "./ObservationLog";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
+import { BenchIO } from "./BenchIO";
 
 const VESSEL_OPTIONS = [
   { apparatusId: "beaker-250", label: "Beaker" },
@@ -57,10 +58,13 @@ export function SandboxView() {
             computed from the mixture — watch the Observations panel.
           </p>
         </div>
-        <Button variant="soft" size="sm" onClick={resetAll}>
-          <RotateCcw className="h-4 w-4" />
-          Reset experiment
-        </Button>
+        <div className="flex items-center gap-2">
+          <BenchIO />
+          <Button variant="soft" size="sm" onClick={resetAll}>
+            <RotateCcw className="h-4 w-4" />
+            Reset experiment
+          </Button>
+        </div>
       </div>
 
       {/* Pour banner */}

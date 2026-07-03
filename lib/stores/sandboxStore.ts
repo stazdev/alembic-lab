@@ -39,6 +39,20 @@ export interface Observation {
   vesselLabel: string;
 }
 
+/** Serializable bench snapshot (§4.4) — save, resume, and share a setup. */
+export interface SavedVessel {
+  apparatusId: string;
+  label: string;
+  components: MixtureComponent[];
+  temperatureC: number;
+  heating: boolean;
+}
+
+export interface SavedBench {
+  v: 1;
+  vessels: SavedVessel[];
+}
+
 interface SandboxState {
   vessels: Vessel[];
   selectedVesselId: string | null;
@@ -59,6 +73,8 @@ interface SandboxState {
   pourInto: (targetId: string) => void;
   clearVessel: (vesselId: string) => void;
   tick: (dtSeconds: number) => void;
+  serialize: () => SavedBench;
+  loadBench: (bench: SavedBench) => void;
   resetAll: () => void;
 }
 
@@ -354,6 +370,61 @@ export const useSandbox = create<SandboxState>((set, get) => ({
       });
 
       return { vessels, observations, obsCounter };
+    }),
+
+  serialize: () => ({
+    v: 1,
+    vessels: get().vessels.map((v) => ({
+      apparatusId: v.apparatusId,
+      label: v.label,
+      components: v.components.map((c) => ({
+        reagentId: c.reagentId,
+        amountMl: c.amountMl,
+      })),
+      temperatureC: v.temperatureC,
+      heating: v.heating,
+    })),
+  }),
+
+  loadBench: (bench) =>
+    set((state) => {
+      if (!bench || !Array.isArray(bench.vessels)) return state;
+      const typeCounts: Record<string, number> = {};
+      let counter = 0;
+      const vessels: Vessel[] = bench.vessels
+        .filter((sv) => sv && getApparatus(sv.apparatusId))
+        .slice(0, MAX_VESSELS)
+        .map((sv) => {
+          counter += 1;
+          typeCounts[sv.apparatusId] = (typeCounts[sv.apparatusId] ?? 0) + 1;
+          const apparatus = getApparatus(sv.apparatusId);
+          const components = (Array.isArray(sv.components) ? sv.components : [])
+            .filter((c) => c && getReagent(c.reagentId) && Number(c.amountMl) > 0)
+            .map((c) => ({ reagentId: c.reagentId, amountMl: Number(c.amountMl) }));
+          return {
+            id: `v${counter}`,
+            apparatusId: sv.apparatusId,
+            label:
+              typeof sv.label === "string" && sv.label
+                ? sv.label
+                : `${apparatus?.name ?? "Vessel"} ${typeCounts[sv.apparatusId]}`,
+            components,
+            temperatureC: Number.isFinite(sv.temperatureC)
+              ? sv.temperatureC
+              : ROOM_TEMP_C,
+            heating: !!sv.heating,
+            seen: [],
+          };
+        });
+      return {
+        vessels,
+        vesselCounter: counter,
+        selectedVesselId: vessels[0]?.id ?? null,
+        pourSourceId: null,
+        observations: [],
+        obsCounter: state.obsCounter,
+        hydrated: true,
+      };
     }),
 
   resetAll: () => {

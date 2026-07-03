@@ -4,8 +4,10 @@ import type { MouseEvent } from "react";
 import { Droplets, Flame, Thermometer, Trash2, X } from "lucide-react";
 import { getApparatus } from "@/data/apparatus";
 import { resolveMixture, totalVolume } from "@/lib/chemistry/resolve";
+import { assessSafety } from "@/lib/chemistry/safety";
 import { useSandbox, type Vessel } from "@/lib/stores/sandboxStore";
 import { VesselView } from "./VesselView";
+import { SafetyBanner } from "./SafetyBanner";
 import { IconButton } from "@/components/ui/IconButton";
 import { Tooltip } from "@/components/ui/Tooltip";
 import { cn } from "@/lib/utils";
@@ -26,10 +28,17 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
   const iconKind = apparatus?.icon ?? "beaker";
   const volume = totalVolume(vessel.components);
   const fillFrac = volume / capacity;
-  const { appearance, pH } = resolveMixture(
-    vessel.components,
-    vessel.temperatureC,
-  );
+  const mixture = resolveMixture(vessel.components, vessel.temperatureC);
+  const { appearance, pH } = mixture;
+  const safety = assessSafety({
+    temperatureC: vessel.temperatureC,
+    heatKJ: mixture.heatKJ,
+    gasRate: appearance.gasRate,
+    pH,
+    volumeMl: volume,
+    capacityMl: capacity,
+    heating: vessel.heating,
+  });
 
   const selected = selectedId === vessel.id;
   const isSource = pourSourceId === vessel.id;
@@ -131,6 +140,20 @@ export function VesselCard({ vessel }: { vessel: Vessel }) {
           {Math.round(volume)} / {capacity} mL
         </span>
       </div>
+
+      {/* Safety (§4.3) */}
+      {safety && (
+        <div className="mt-2">
+          <SafetyBanner
+            event={safety}
+            onReset={
+              safety.tier === "incident" || safety.tier === "critical"
+                ? () => clearVessel(vessel.id)
+                : undefined
+            }
+          />
+        </div>
+      )}
 
       {/* Actions */}
       <div className="mt-3 flex items-center gap-1.5 border-t border-line pt-3">
