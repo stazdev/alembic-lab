@@ -43,6 +43,59 @@ export function renderContext(ctx: AiContext): string {
   return lines.join("\n");
 }
 
+/** A problem shape shared by guided tasks and generated questions. */
+export interface TaskLike {
+  topic: string;
+  prompt: string;
+  given?: { label: string; value: string }[];
+  answer:
+    | { kind: "numeric"; value: number; unit?: string }
+    | { kind: "choice"; options: string[]; correctIndex: number };
+  solution: string;
+}
+
+const factsBlock = (facts: { label: string; value: string }[]): string =>
+  facts.map((f) => `- ${f.label}: ${f.value}`).join("\n");
+
+const answerText = (a: TaskLike["answer"]): string =>
+  a.kind === "numeric" ? `${a.value}${a.unit ? ` ${a.unit}` : ""}` : a.options[a.correctIndex];
+
+/** Explain a solution: the answer AND worked solution are provided as ground truth. */
+export function explainSolutionPrompt(t: TaskLike): { system: string; prompt: string } {
+  const facts = [
+    { label: "Problem", value: t.prompt.replace(/\s+/g, " ").trim() },
+    ...(t.given ?? []),
+    { label: "Correct answer", value: answerText(t.answer) },
+    { label: "Worked solution", value: t.solution },
+  ];
+  return {
+    system: TUTOR_SYSTEM,
+    prompt: `A student is working a ${t.topic} problem and wants to understand the solution.\n\nKnown values (computed by Alembic's verified engines — ground truth):\n${factsBlock(
+      facts,
+    )}\n\nExplain the reasoning behind this solution step by step so the student understands the method. Be concise; don't just restate the numbers.`,
+  };
+}
+
+/** A single hint: the answer and solution are DELIBERATELY withheld. */
+export function hintPrompt(t: TaskLike): { system: string; prompt: string } {
+  const facts = [
+    { label: "Problem", value: t.prompt.replace(/\s+/g, " ").trim() },
+    ...(t.given ?? []),
+  ];
+  return {
+    system: HINT_SYSTEM,
+    prompt: `A student is solving a ${t.topic} problem and is stuck.\n\n${factsBlock(
+      facts,
+    )}\n\nGive exactly one short hint toward the method or next step. Do NOT reveal the final answer.`,
+  };
+}
+
+export const HINT_SYSTEM = `You are the Alembic chemistry tutor giving a SINGLE hint to a student who is stuck on a problem.
+- Offer one short, Socratic nudge toward the correct method or the next step.
+- NEVER state or reveal the final numeric or multiple-choice answer, and never fully work the problem.
+- Keep it to one or two sentences and encourage them to try.
+- Refuse to help with anything unsafe, illegal, or harmful.`;
+
 export const TUTOR_SYSTEM = `You are the Alembic chemistry tutor, helping secondary-school and undergraduate students with chemistry and biochemistry.
 
 Guidelines:

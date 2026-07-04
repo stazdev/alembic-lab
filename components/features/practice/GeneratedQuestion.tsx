@@ -7,8 +7,10 @@
  */
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, Lightbulb, X } from "lucide-react";
+import { ArrowRight, Check, Lightbulb, MessageCircleQuestion, X } from "lucide-react";
 import type { GeneratedTask } from "@/lib/chemistry/generators/types";
+import { AiActionButton } from "@/components/features/ai/AiActionButton";
+import { explainSolutionPrompt, hintPrompt } from "@/lib/ai/context";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { cn } from "@/lib/utils";
@@ -154,6 +156,13 @@ export function GeneratedQuestion({
             ))}
           </ol>
         )}
+        <AiActionButton
+          {...hintPrompt(task)}
+          label="Ask the tutor for a hint"
+          icon={<MessageCircleQuestion className="h-3.5 w-3.5" />}
+          maxOutputTokens={160}
+          className="mt-3"
+        />
       </div>
 
       {/* Solution */}
@@ -168,6 +177,12 @@ export function GeneratedQuestion({
             <p className="whitespace-pre-line text-sm leading-relaxed text-ink">
               {task.solution}
             </p>
+            <AiActionButton
+              {...explainSolutionPrompt(task)}
+              label="Explain this solution"
+              maxOutputTokens={500}
+              className="mt-3"
+            />
           </div>
         )}
       </div>

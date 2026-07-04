@@ -7,6 +7,8 @@ import type { Task } from "@/data/tasks";
 import { useTasks } from "@/lib/stores/tasksStore";
 import { useMounted } from "@/lib/hooks/useMounted";
 import { Molecule3D } from "@/components/chem/Molecule3D";
+import { AiActionButton } from "@/components/features/ai/AiActionButton";
+import { explainSolutionPrompt } from "@/lib/ai/context";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
 import { Pill } from "@/components/ui/Pill";
@@ -218,6 +220,12 @@ export function TaskDetail({ task }: { task: Task }) {
           <div className="rounded-ctrl border border-line bg-surface-2 p-4">
             <div className="mb-1 text-xs font-medium text-ink-3">Solution</div>
             <p className="text-sm leading-relaxed text-ink">{task.solution}</p>
+            <AiActionButton
+              {...explainSolutionPrompt(task)}
+              label="Explain this solution"
+              maxOutputTokens={500}
+              className="mt-3"
+            />
           </div>
         )}
       </div>
