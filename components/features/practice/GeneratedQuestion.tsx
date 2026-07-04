@@ -160,7 +160,7 @@ export function GeneratedQuestion({
           {...hintPrompt(task)}
           label="Ask the tutor for a hint"
           icon={<MessageCircleQuestion className="h-3.5 w-3.5" />}
-          maxOutputTokens={160}
+          maxOutputTokens={400}
           className="mt-3"
         />
       </div>
@@ -180,7 +180,7 @@ export function GeneratedQuestion({
             <AiActionButton
               {...explainSolutionPrompt(task)}
               label="Explain this solution"
-              maxOutputTokens={500}
+              maxOutputTokens={1500}
               className="mt-3"
             />
           </div>

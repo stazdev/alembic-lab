@@ -223,7 +223,7 @@ export function TaskDetail({ task }: { task: Task }) {
             <AiActionButton
               {...explainSolutionPrompt(task)}
               label="Explain this solution"
-              maxOutputTokens={500}
+              maxOutputTokens={1500}
               className="mt-3"
             />
           </div>

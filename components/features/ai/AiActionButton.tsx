@@ -18,7 +18,7 @@ export function AiActionButton({
   system,
   prompt,
   icon,
-  maxOutputTokens = 500,
+  maxOutputTokens = 1024,
   className,
 }: {
   label: string;

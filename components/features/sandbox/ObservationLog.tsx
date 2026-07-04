@@ -49,7 +49,7 @@ export function ObservationLog() {
           label="Explain what happened"
           system={explain.system}
           prompt={explain.prompt}
-          maxOutputTokens={450}
+          maxOutputTokens={1000}
           className="mb-3"
         />
       )}

@@ -77,7 +77,7 @@ export function MoleculeInsights({
         model,
         system: TUTOR_SYSTEM,
         prompt,
-        maxOutputTokens: 400,
+        maxOutputTokens: 1000,
         signal: controller.signal,
       })) {
         acc += delta;

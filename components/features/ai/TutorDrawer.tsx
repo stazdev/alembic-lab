@@ -80,7 +80,7 @@ export function TutorDrawer({ open, onClose }: { open: boolean; onClose: () => v
         model,
         system: `${TUTOR_SYSTEM}\n\n${renderContext(pageContext(pathname))}\n\nContinue the conversation, replying as the tutor to the student's latest message.`,
         prompt: transcript,
-        maxOutputTokens: 800,
+        maxOutputTokens: 1500,
         signal: controller.signal,
       })) {
         acc += delta;

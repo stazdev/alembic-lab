@@ -47,6 +47,19 @@ describe("gemini client — generate", () => {
     expect(String(init.body)).toContain("systemInstruction");
   });
 
+  it("disables thinking for Flash models (so it can't eat the token budget) but not Pro", async () => {
+    const fetchMock = vi.fn(
+      async (_url: string, _init: RequestInit) => jsonResponse(200, textPayload("ok")),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await generate({ apiKey: "k", model: "gemini-2.5-flash", prompt: "hi" });
+    await generate({ apiKey: "k", model: "gemini-2.5-pro", prompt: "hi" });
+    const flashBody = String(fetchMock.mock.calls[0][1].body);
+    const proBody = String(fetchMock.mock.calls[1][1].body);
+    expect(flashBody).toContain("thinkingBudget");
+    expect(proBody).not.toContain("thinkingBudget");
+  });
+
   it("maps 403 to a friendly auth error", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => jsonResponse(403, { error: { message: "bad key" } })));
     await expect(generate({ apiKey: "k", model: "m", prompt: "hi" })).rejects.toMatchObject({

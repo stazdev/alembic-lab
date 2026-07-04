@@ -32,12 +32,18 @@ export interface GenInput {
 }
 
 function body(input: GenInput) {
+  // Gemini 2.5/3 "thinking" consumes maxOutputTokens, which truncates or empties
+  // the visible answer. These are short explanatory tasks that don't need it, so
+  // disable it for Flash models (thinkingBudget 0). Pro can't disable thinking,
+  // so we rely on the generous token cap there instead.
+  const disableThinking = /flash/i.test(input.model);
   return JSON.stringify({
     contents: [{ role: "user", parts: [{ text: input.prompt }] }],
     ...(input.system ? { systemInstruction: { parts: [{ text: input.system }] } } : {}),
     generationConfig: {
       temperature: input.temperature ?? 0.4,
-      maxOutputTokens: input.maxOutputTokens ?? 800,
+      maxOutputTokens: input.maxOutputTokens ?? 1024,
+      ...(disableThinking ? { thinkingConfig: { thinkingBudget: 0 } } : {}),
     },
   });
 }
