@@ -37,7 +37,9 @@ export function checkGenerator(gen: TaskGenerator, opts: HarnessOptions = {}): v
       if (t.answer.kind === "numeric") {
         const { value, tolerance } = t.answer;
         expect(Number.isFinite(value)).toBe(true);
-        expect(tolerance).toBeGreaterThan(0);
+        // ≥ 0: exact-integer answers (balancing, degrees of unsaturation) key
+        // tolerance 0, meaning an exact match is required — the tightest grade.
+        expect(tolerance).toBeGreaterThanOrEqual(0);
         // Tolerance is small relative to the value (never a free pass).
         expect(tolerance).toBeLessThan(Math.abs(value) * 0.5 + 1);
         if (opts.numeric?.min !== undefined) {

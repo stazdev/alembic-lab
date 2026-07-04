@@ -11,8 +11,13 @@ import { hessEnthalpyGen, gibbsGen, calorimetryGen } from "./energetics";
 import { halfLifeGen, arrheniusGen } from "./kinetics";
 import { solubilityGen, leChatelierGen } from "./equilibrium";
 import { cellPotentialGen, nernstGen } from "./electrochem";
+import { balanceCoefficientGen, redoxCoefficientGen } from "./balancing";
+import { functionalGroupIdGen, degreeUnsaturationGen } from "./organic";
 
 export const GENERATORS: TaskGenerator[] = [
+  // Balancing
+  balanceCoefficientGen,
+  redoxCoefficientGen,
   // Stoichiometry
   molarMassGen,
   dilutionGen,
@@ -37,6 +42,9 @@ export const GENERATORS: TaskGenerator[] = [
   // Electrochemistry
   cellPotentialGen,
   nernstGen,
+  // Organic
+  functionalGroupIdGen,
+  degreeUnsaturationGen,
 ];
 
 const BY_ID = new Map(GENERATORS.map((g) => [g.id, g]));

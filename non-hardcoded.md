@@ -595,7 +595,7 @@ tests/generators/*.test.ts
 | **G0 — Kernel** | `rng`, `types`, `build`, `format`, `distractors`, `registry` + property-test harness | The generation machinery, proven on one generator | ✅ **shipped** |
 | **G1 — Quant topics** | Stoichiometry, Gas Laws, pH, Thermo, Kinetics, Equilibrium, Electrochem generators (2–4 each) + property tests | Infinite, correct questions for the whole quantitative curriculum | ✅ **shipped** — 17 generators, all engine-graded, property-tested |
 | **G2 — UI & mastery** | `PracticeView`, seed-in-URL sharing, `practiceStore`, Dashboard mastery, migration from `alembic-tasks` | Students practice unlimited varied questions; instructors assign by URL | ✅ **shipped** — `/practice` route, per-generator mastery, ?g&s&d sharing, walkthrough |
-| **G3 — Balancing & organic** | Balancing/redox generators; organic/functional-group generators after the structure work in the improvement plan | Full topic coverage | |
+| **G3 — Balancing & organic** | Balancing/redox generators; organic/functional-group generators after the structure work in the improvement plan | Full topic coverage | ✅ **shipped** — molecular + redox balancing, functional-group ID, degree of unsaturation (21 generators total) |
 | **G4 — Adaptive (optional)** | BKT difficulty selection; optional in-browser phrasing | Personalized practice | |
 
 **G1 shipped (17 generators):** molar mass · dilution · molarity · ideal gas · combined gas · strong-acid
