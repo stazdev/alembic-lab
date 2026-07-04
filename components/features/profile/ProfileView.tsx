@@ -64,7 +64,8 @@ export function ProfileView() {
   ];
 
   return (
-    <div className="mt-8 max-w-2xl space-y-6">
+    <div className="mt-8 grid max-w-5xl gap-6 lg:grid-cols-[minmax(0,360px)_1fr] lg:items-start">
+      <div className="space-y-6 lg:sticky lg:top-6">
       {/* Identity */}
       <section className="rounded-card border border-line bg-surface p-5">
         <div className="flex items-start gap-4">
@@ -132,7 +133,9 @@ export function ProfileView() {
           ))}
         </div>
       </section>
+      </div>
 
+      <div className="space-y-6">
       {/* Progress by topic */}
       <section className="rounded-card border border-line bg-surface p-5">
         <h2 className="text-base font-semibold text-ink">Progress by topic</h2>
@@ -184,6 +187,7 @@ export function ProfileView() {
           ))}
         </div>
       </section>
+      </div>
     </div>
   );
 }

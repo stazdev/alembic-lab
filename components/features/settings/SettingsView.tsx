@@ -184,7 +184,8 @@ export function SettingsView() {
   ];
 
   return (
-    <div className="mt-8 max-w-2xl space-y-6">
+    <div className="mt-8 grid max-w-5xl gap-6 lg:grid-cols-2 lg:items-start">
+      <div className="space-y-6">
       {/* Appearance & accessibility */}
       <section className="rounded-card border border-line bg-surface p-5">
         <h2 className="text-base font-semibold text-ink">
@@ -344,7 +345,9 @@ export function SettingsView() {
           </p>
         </div>
       </section>
+      </div>
 
+      <div className="space-y-6">
       {/* Data & storage */}
       <section className="rounded-card border border-line bg-surface p-5">
         <h2 className="text-base font-semibold text-ink">Data &amp; storage</h2>
@@ -419,6 +422,7 @@ export function SettingsView() {
           ))}
         </div>
       </section>
+      </div>
     </div>
   );
 }
