@@ -470,8 +470,8 @@ and `molarSolubility` respectively.)*
 ## 12. Progress & mastery rework
 
 "Completed 39/39" is meaningless when questions are infinite. Replace the `completed: string[]` store
-with **per-generator mastery**, which also sets up the adaptive-learning idea from the improvement plan
-([FSRS/BKT](Lab-improvement.md)).
+with **per-generator mastery**, which also sets up an optional adaptive-learning layer (a lightweight
+BKT mastery estimate, or FSRS-style spaced review — both pure-JS, no backend).
 
 ```ts
 // lib/stores/practiceStore.ts  (persisted as "alembic-practice")
@@ -619,6 +619,6 @@ The engine files landed as `gases.ts` / `energetics.ts` / `electrochem.ts` (not 
 
 ---
 
-*Companion to `Lab-improvement.md`. This engine makes the **tasks** non-hardcoded; Improvement 1 in
-that plan makes the **sandbox reactions** non-hardcoded. Both share the same principle: author the
-templates and the datasets, never the answers — compute those, and property-test them.*
+*This engine makes the **tasks** non-hardcoded. The same principle applies to the sandbox's still-fixed
+17-reaction ruleset (`lib/chemistry/resolve.ts`): author the templates and the datasets, never the
+answers — compute those from the verified engines, and property-test them.*
