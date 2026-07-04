@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { CATEGORY_META, type ElementDatum } from "@/data/elements";
 import { electronConfiguration } from "@/lib/chemistry/electronConfig";
 import { AtomicModel3D } from "./AtomicModel3D";
+import { ElementInsights } from "./ElementInsights";
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -145,6 +146,13 @@ export function ElementDetail({
               <div className="text-[11px] font-medium uppercase tracking-wide text-ink-3">
                 Physical properties
               </div>
+              {element.category === "unknown" && (
+                <p className="mt-1.5 text-[11px] leading-relaxed text-ink-3">
+                  Synthetic superheavy element — values below are largely{" "}
+                  <span className="font-medium text-ink-2">predicted</span>, not
+                  measured.
+                </p>
+              )}
               <dl className="mt-2 divide-y divide-line rounded-ctrl bg-surface-2 px-3">
                 <PropRow
                   label="Standard state"
@@ -205,6 +213,11 @@ export function ElementDetail({
                   {cfg.notation}
                 </div>
               </div>
+            </div>
+
+            {/* AI insights */}
+            <div className="mt-5 px-5 pb-6">
+              <ElementInsights element={element} />
             </div>
           </motion.aside>,
         ]}
