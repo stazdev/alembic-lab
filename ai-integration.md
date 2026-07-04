@@ -324,7 +324,7 @@ tests/ai/gemini.test.ts                       # client parsing/errors with mocke
 | **AI-1 — Tutor** | `TutorDrawer` + TopBar button + page context | The flagship chat assistant works end-to-end | ✅ shipped |
 | **AI-2 — Explain & Hints** | `AiActionButton` in Sandbox + Tasks/Practice; "Ask the tutor" hint in Practice | Contextual explanations and Socratic hints | ✅ shipped |
 | **AI-3 — Molecule insights** | `MoleculeInsights` card on Molecules | AI compound summaries beside computed properties | ✅ shipped |
-| **Polish** | walkthrough steps for the tutor, reduced-motion, error/empty states, caching | Consistent with the rest of the app | error/empty states + session caching done; optional extras remain |
+| **Polish** | walkthrough steps for the tutor, reduced-motion, error/empty states, caching | Consistent with the rest of the app | ✅ shipped — dashboard tour introduces the tutor (data-tour on the TopBar button); TutorDrawer honours reduced-motion (prefers-reduced-motion + the app pref); error/empty states + session caching done |
 
 **Shipped notes.** The reusable component landed as `AiActionButton` (not `ExplainButton`). The TopBar
 tutor button is always visible (with an in-drawer "connect a key" prompt) rather than hidden — more

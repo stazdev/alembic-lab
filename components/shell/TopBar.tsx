@@ -77,6 +77,7 @@ export function TopBar() {
       <div className="flex items-center gap-2">
         <button
           type="button"
+          data-tour="tutor-button"
           onClick={() => setTutorOpen(true)}
           aria-label="Open the AI chemistry tutor"
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-pill border border-line bg-surface text-ink transition hover:bg-surface-2 active:scale-95"

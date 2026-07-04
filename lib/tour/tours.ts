@@ -42,6 +42,11 @@ export const TOURS: Tour[] = [
         title: "Explore the modules",
         body: "Jump into any part of the lab from here. A good first stop: the Sandbox, where you mix real reagents and watch the chemistry unfold.",
       },
+      {
+        target: "tutor-button",
+        title: "Optional: the AI tutor",
+        body: "Connect your own Google Gemini key in Settings to unlock this AI tutor — chat about your work, explain any result, get practice hints, and read molecule & element insights. It's entirely optional and your key stays in this browser.",
+      },
     ],
   },
   {

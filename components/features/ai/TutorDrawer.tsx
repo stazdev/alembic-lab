@@ -8,9 +8,10 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ArrowUp, Eraser, Sparkles, Square, X } from "lucide-react";
 import { useAi, hasAi } from "@/lib/stores/aiStore";
+import { usePrefs } from "@/lib/stores/prefsStore";
 import { streamGenerate, GeminiError } from "@/lib/ai/gemini";
 import { TUTOR_SYSTEM, pageContext, renderContext } from "@/lib/ai/context";
 import { AiMarkdown } from "./AiMarkdown";
@@ -32,6 +33,9 @@ export function TutorDrawer({ open, onClose }: { open: boolean; onClose: () => v
   const model = useAi((s) => s.model);
   const ready = useAi(hasAi);
   const pathname = usePathname();
+  const prefersReduced = useReducedMotion();
+  const reduceMotionPref = usePrefs((s) => s.reduceMotion);
+  const noMotion = Boolean(prefersReduced) || reduceMotionPref;
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -127,17 +131,17 @@ export function TutorDrawer({ open, onClose }: { open: boolean; onClose: () => v
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: noMotion ? 0 : 0.2 }}
           onClick={onClose}
         />,
         <motion.aside
           key="panel"
           aria-label="AI chemistry tutor"
           className="fixed inset-4 z-50 flex flex-col overflow-hidden rounded-card border border-line bg-surface shadow-lift sm:left-auto sm:w-full sm:max-w-md"
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          transition={{ type: "spring", stiffness: 320, damping: 34 }}
+          initial={noMotion ? { opacity: 0 } : { x: "100%" }}
+          animate={noMotion ? { opacity: 1 } : { x: 0 }}
+          exit={noMotion ? { opacity: 0 } : { x: "100%" }}
+          transition={noMotion ? { duration: 0 } : { type: "spring", stiffness: 320, damping: 34 }}
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-3 border-b border-line p-4">
