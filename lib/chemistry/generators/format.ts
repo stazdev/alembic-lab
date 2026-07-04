@@ -24,3 +24,9 @@ export function fmt(value: number, dp = 2): string {
   const r = round(value, dp);
   return (Object.is(r, -0) ? 0 : r).toFixed(dp);
 }
+
+/** Compact scientific notation for very small/large magnitudes, e.g. "1.3e-5". */
+export function sci(value: number, sig = 2): string {
+  if (value === 0) return "0";
+  return value.toExponential(Math.max(0, sig - 1));
+}

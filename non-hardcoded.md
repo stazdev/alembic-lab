@@ -590,13 +590,19 @@ tests/generators/*.test.ts
 
 **Phases**
 
-| Phase | Scope | Outcome |
-|---|---|---|
-| **G0 — Kernel** | `rng`, `types`, `build`, `format`, `distractors`, `registry` + property-test harness | The generation machinery, proven on one generator |
-| **G1 — Quant topics** | Stoichiometry, Gas Laws, pH, Thermo, Kinetics, Equilibrium, Electrochem generators (2–4 each) + property tests | Infinite, correct questions for the whole quantitative curriculum |
-| **G2 — UI & mastery** | `PracticeView`, seed-in-URL sharing, `practiceStore`, Dashboard mastery, migration from `alembic-tasks` | Students practice unlimited varied questions; instructors assign by URL |
-| **G3 — Balancing & organic** | Balancing/redox generators; organic/functional-group generators after the structure work in the improvement plan | Full topic coverage |
-| **G4 — Adaptive (optional)** | BKT difficulty selection; optional in-browser phrasing | Personalized practice |
+| Phase | Scope | Outcome | Status |
+|---|---|---|---|
+| **G0 — Kernel** | `rng`, `types`, `build`, `format`, `distractors`, `registry` + property-test harness | The generation machinery, proven on one generator | ✅ **shipped** |
+| **G1 — Quant topics** | Stoichiometry, Gas Laws, pH, Thermo, Kinetics, Equilibrium, Electrochem generators (2–4 each) + property tests | Infinite, correct questions for the whole quantitative curriculum | ✅ **shipped** — 17 generators, all engine-graded, property-tested |
+| **G2 — UI & mastery** | `PracticeView`, seed-in-URL sharing, `practiceStore`, Dashboard mastery, migration from `alembic-tasks` | Students practice unlimited varied questions; instructors assign by URL | next |
+| **G3 — Balancing & organic** | Balancing/redox generators; organic/functional-group generators after the structure work in the improvement plan | Full topic coverage | |
+| **G4 — Adaptive (optional)** | BKT difficulty selection; optional in-browser phrasing | Personalized practice | |
+
+**G1 shipped (17 generators):** molar mass · dilution · molarity · ideal gas · combined gas · strong-acid
+pH · weak-acid pH (MCQ) · buffer pH · Hess ΔH · Gibbs ΔG · calorimetry · half-life · Arrhenius Ea ·
+molar solubility (MCQ) · Le Chatelier (MCQ) · standard cell potential · Nernst. Every answer is computed
+by the corresponding verified engine; 145 tests pass (property sweep across ~300 seeds × each generator).
+The engine files landed as `gases.ts` / `energetics.ts` / `electrochem.ts` (not the tentative names above).
 
 ---
 
