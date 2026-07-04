@@ -5,6 +5,7 @@ import { RotateCcw, Sparkles, Trash2 } from "lucide-react";
 import { usePrefs } from "@/lib/stores/prefsStore";
 import { useTasks } from "@/lib/stores/tasksStore";
 import { useTour } from "@/lib/stores/tourStore";
+import { usePractice } from "@/lib/stores/practiceStore";
 import { TASKS } from "@/data/tasks";
 import { ELEMENTS } from "@/data/elements";
 import { REAGENTS } from "@/lib/chemistry/reagents";
@@ -133,6 +134,7 @@ export function SettingsView() {
   const resetTasks = useTasks((s) => s.reset);
   const toursSeen = useTour((s) => s.seen);
   const resetTours = useTour((s) => s.resetSeen);
+  const resetPractice = usePractice((s) => s.reset);
   const [confirmTasks, setConfirmTasks] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
 
@@ -142,6 +144,7 @@ export function SettingsView() {
   function clearAll() {
     resetTasks();
     resetTours();
+    resetPractice();
     setDisplayName("");
     setTitle("");
     setReduceMotion(false);

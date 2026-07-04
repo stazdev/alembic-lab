@@ -214,6 +214,41 @@ export const TOURS: Tour[] = [
       },
     ],
   },
+  {
+    id: "practice",
+    path: "/practice",
+    steps: [
+      {
+        title: "Practice mode",
+        body: "Unlimited, auto-generated questions. Unlike the fixed guided tasks, every question here is freshly built from a template and graded by the same engines as the calculators — so the answers are always correct.",
+      },
+      {
+        target: "practice-topic",
+        title: "Choose a topic",
+        body: "Switch between the quantitative topics — stoichiometry, gases, pH, energetics, kinetics, equilibrium, and electrochemistry.",
+      },
+      {
+        target: "practice-generator",
+        title: "Pick a question type & difficulty",
+        body: "Each topic has several generators. A ✨ marks ones you've mastered. Set the difficulty on the right.",
+      },
+      {
+        target: "practice-question",
+        title: "Answer it",
+        body: "Solve the question, use staged hints if stuck, and check your answer. The seed number identifies this exact question.",
+      },
+      {
+        target: "practice-controls",
+        title: "New question & sharing",
+        body: "“New question” generates a fresh one instantly. “Share” copies a link that reproduces this exact question — how an instructor can assign one.",
+      },
+      {
+        target: "practice-mastery",
+        title: "Build mastery",
+        body: "Answer a few in a row to master each generator. Your streak and accuracy are tracked here, saved in this browser.",
+      },
+    ],
+  },
 ];
 
 const BY_PATH = new Map(TOURS.map((t) => [t.path, t]));
