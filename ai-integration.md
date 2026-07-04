@@ -318,13 +318,18 @@ tests/ai/gemini.test.ts                       # client parsing/errors with mocke
 
 ## 16. Phased build plan
 
-| Phase | Scope | Outcome |
-|---|---|---|
-| **AI-0 — Foundation** | `aiStore`, `lib/ai/gemini.ts` (+ tests with mocked fetch), Settings "AI assistant" section with key + model + Test | Users can add/validate a key; nothing calls it yet |
-| **AI-1 — Tutor** | `TutorDrawer` + TopBar button + page context | The flagship chat assistant works end-to-end |
-| **AI-2 — Explain & Hints** | `ExplainButton` in Sandbox + Tasks/Practice; "Ask the tutor" hint in Practice | Contextual explanations and Socratic hints |
-| **AI-3 — Molecule insights** | `MoleculeInsights` card on Molecules | AI compound summaries beside computed properties |
-| **Polish** | walkthrough steps for the tutor, reduced-motion, error/empty states, caching | Consistent with the rest of the app |
+| Phase | Scope | Outcome | Status |
+|---|---|---|---|
+| **AI-0 — Foundation** | `aiStore`, `lib/ai/gemini.ts` (+ tests with mocked fetch), Settings "AI assistant" section with key + model + Test | Users can add/validate a key; nothing calls it yet | ✅ shipped |
+| **AI-1 — Tutor** | `TutorDrawer` + TopBar button + page context | The flagship chat assistant works end-to-end | ✅ shipped |
+| **AI-2 — Explain & Hints** | `AiActionButton` in Sandbox + Tasks/Practice; "Ask the tutor" hint in Practice | Contextual explanations and Socratic hints | ✅ shipped |
+| **AI-3 — Molecule insights** | `MoleculeInsights` card on Molecules | AI compound summaries beside computed properties | ✅ shipped |
+| **Polish** | walkthrough steps for the tutor, reduced-motion, error/empty states, caching | Consistent with the rest of the app | error/empty states + session caching done; optional extras remain |
+
+**Shipped notes.** The reusable component landed as `AiActionButton` (not `ExplainButton`). The TopBar
+tutor button is always visible (with an in-drawer "connect a key" prompt) rather than hidden — more
+discoverable and avoids a hydration guard on the button. Every AI surface self-gates on `hasAi` behind
+a `useMounted()` guard. 164 tests pass (incl. the mocked-fetch Gemini client suite).
 
 ## 17. Risks & mitigations
 
