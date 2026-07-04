@@ -28,9 +28,6 @@ function PropRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-const fmtVal = (v: number | null, unit?: string): string =>
-  v == null ? "—" : `${v}${unit ? ` ${unit}` : ""}`;
-
 const capitalize = (s: string): string =>
   s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -57,6 +54,11 @@ export function ElementDetail({
 
   const cfg = element ? electronConfiguration(element.z) : null;
   const meta = element ? CATEGORY_META[element.category] : null;
+  // Elements 104+ are synthetic superheavies: some properties genuinely have no
+  // established value even in the literature — show that plainly, not a bare dash.
+  const predicted = !!element && element.z >= 104;
+  const pv = (v: number | null, unit?: string): string =>
+    v == null ? (predicted ? "Not established" : "—") : `${v}${unit ? ` ${unit}` : ""}`;
 
   return (
     <AnimatePresence>
@@ -146,39 +148,37 @@ export function ElementDetail({
               <div className="text-[11px] font-medium uppercase tracking-wide text-ink-3">
                 Physical properties
               </div>
-              {element.category === "unknown" && (
+              {predicted && (
                 <p className="mt-1.5 text-[11px] leading-relaxed text-ink-3">
-                  Synthetic superheavy element — values below are largely{" "}
+                  Synthetic superheavy element — most values are{" "}
                   <span className="font-medium text-ink-2">predicted</span>, not
-                  measured.
+                  measured. A few (electronegativity, some phase points) have no
+                  established value even in the literature.
                 </p>
               )}
               <dl className="mt-2 divide-y divide-line rounded-ctrl bg-surface-2 px-3">
                 <PropRow
                   label="Standard state"
-                  value={capitalize(element.standardState)}
+                  value={
+                    element.standardState === "unknown"
+                      ? predicted
+                        ? "Not established"
+                        : "Unknown"
+                      : capitalize(element.standardState)
+                  }
                 />
                 <PropRow
                   label="Electronegativity"
-                  value={fmtVal(element.electronegativity)}
+                  value={pv(element.electronegativity)}
                 />
-                <PropRow
-                  label="Atomic radius"
-                  value={fmtVal(element.atomicRadius, "pm")}
-                />
+                <PropRow label="Atomic radius" value={pv(element.atomicRadius, "pm")} />
                 <PropRow
                   label="Ionization energy"
-                  value={fmtVal(element.ionizationEnergy, "kJ/mol")}
+                  value={pv(element.ionizationEnergy, "kJ/mol")}
                 />
-                <PropRow
-                  label="Melting point"
-                  value={fmtVal(element.meltingPoint, "K")}
-                />
-                <PropRow
-                  label="Boiling point"
-                  value={fmtVal(element.boilingPoint, "K")}
-                />
-                <PropRow label="Density" value={fmtVal(element.density, "g/cm³")} />
+                <PropRow label="Melting point" value={pv(element.meltingPoint, "K")} />
+                <PropRow label="Boiling point" value={pv(element.boilingPoint, "K")} />
+                <PropRow label="Density" value={pv(element.density, "g/cm³")} />
               </dl>
             </div>
 
