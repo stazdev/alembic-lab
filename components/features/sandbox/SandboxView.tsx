@@ -7,6 +7,7 @@ import { useSandbox } from "@/lib/stores/sandboxStore";
 import { VesselCard } from "./VesselCard";
 import { ReagentShelf } from "./ReagentShelf";
 import { ObservationLog } from "./ObservationLog";
+import { SandboxAi } from "./SandboxAi";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { BenchIO } from "./BenchIO";
@@ -123,6 +124,9 @@ export function SandboxView() {
               ))}
             </div>
           )}
+          <div className="mt-3">
+            <SandboxAi />
+          </div>
         </Card>
         </div>
 
