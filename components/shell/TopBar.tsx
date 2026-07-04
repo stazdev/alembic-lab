@@ -4,9 +4,10 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
-import { Bell, HelpCircle, Settings, User } from "lucide-react";
+import { Bell, HelpCircle, Settings, Sparkles, User } from "lucide-react";
 import { ApparatusIcon } from "@/components/chem/ApparatusIcon";
 import { NotificationsDrawer } from "./NotificationsDrawer";
+import { TutorDrawer } from "@/components/features/ai/TutorDrawer";
 import { useTour } from "@/lib/stores/tourStore";
 import { tourForPath } from "@/lib/tour/tours";
 import { cn } from "@/lib/utils";
@@ -24,6 +25,7 @@ const NAV = [
 export function TopBar() {
   const pathname = usePathname();
   const [notifOpen, setNotifOpen] = useState(false);
+  const [tutorOpen, setTutorOpen] = useState(false);
   const startTour = useTour((s) => s.start);
   const pageTour = tourForPath(pathname);
 
@@ -73,6 +75,14 @@ export function TopBar() {
 
       {/* Actions */}
       <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => setTutorOpen(true)}
+          aria-label="Open the AI chemistry tutor"
+          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-pill border border-line bg-surface text-ink transition hover:bg-surface-2 active:scale-95"
+        >
+          <Sparkles className="h-[18px] w-[18px]" />
+        </button>
         {pageTour && (
           <button
             type="button"
@@ -111,6 +121,7 @@ export function TopBar() {
       </div>
 
       <NotificationsDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
+      <TutorDrawer open={tutorOpen} onClose={() => setTutorOpen(false)} />
     </header>
   );
 }
