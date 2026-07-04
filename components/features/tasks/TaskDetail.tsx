@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Check, Lightbulb, RotateCcw, X } from "lucide-react";
 import type { Task } from "@/data/tasks";
 import { useTasks } from "@/lib/stores/tasksStore";
+import { useMounted } from "@/lib/hooks/useMounted";
 import { Molecule3D } from "@/components/chem/Molecule3D";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
@@ -21,7 +22,8 @@ export function TaskDetail({ task }: { task: Task }) {
   const [result, setResult] = useState<boolean | null>(null);
   const [showSolution, setShowSolution] = useState(false);
   const markComplete = useTasks((s) => s.markComplete);
-  const completed = useTasks((s) => s.isComplete(task.id));
+  const mounted = useMounted();
+  const completed = useTasks((s) => s.isComplete(task.id)) && mounted;
 
   function check() {
     let correct = false;

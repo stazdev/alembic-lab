@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { TASKS, TASK_TOPICS, type TaskTopic } from "@/data/tasks";
 import { useTasks } from "@/lib/stores/tasksStore";
+import { useMounted } from "@/lib/hooks/useMounted";
 import { TaskCard } from "./TaskCard";
 import { TaskDetail } from "./TaskDetail";
 import { Card } from "@/components/ui/Card";
@@ -21,7 +22,8 @@ const OPTIONS: SegmentOption<Filter>[] = [
 export function TasksView() {
   const [topic, setTopic] = useState<Filter>("all");
   const [selectedId, setSelectedId] = useState(TASKS[0].id);
-  const completedCount = useTasks((s) => s.completed.length);
+  const storedCount = useTasks((s) => s.completed.length);
+  const completedCount = useMounted() ? storedCount : 0;
 
   const filtered =
     topic === "all" ? TASKS : TASKS.filter((t) => t.topic === topic);
