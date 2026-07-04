@@ -11,7 +11,7 @@ import { Sparkles, Square } from "lucide-react";
 import { useAi, hasAi } from "@/lib/stores/aiStore";
 import { useMounted } from "@/lib/hooks/useMounted";
 import { streamGenerate, GeminiError } from "@/lib/ai/gemini";
-import { cn } from "@/lib/utils";
+import { AiMarkdown } from "./AiMarkdown";
 
 export function AiActionButton({
   label,
@@ -109,10 +109,10 @@ export function AiActionButton({
             <p className="text-xs" style={{ color: "#c0492e" }}>
               {error}
             </p>
+          ) : text ? (
+            <AiMarkdown text={text} />
           ) : (
-            <p className={cn("whitespace-pre-line text-sm leading-relaxed text-ink")}>
-              {text || "…"}
-            </p>
+            <p className="text-sm text-ink-3">…</p>
           )}
           <p className="mt-2 text-[10px] leading-tight text-ink-3">
             May be imperfect — the values above are computed by Alembic&rsquo;s

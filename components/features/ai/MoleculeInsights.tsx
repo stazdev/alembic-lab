@@ -13,6 +13,7 @@ import { useMounted } from "@/lib/hooks/useMounted";
 import { streamGenerate, GeminiError } from "@/lib/ai/gemini";
 import { TUTOR_SYSTEM } from "@/lib/ai/context";
 import { predictProperties } from "@/lib/chem/openchemlib";
+import { AiMarkdown } from "./AiMarkdown";
 
 // Session cache so re-selecting a compound doesn't re-call the API.
 const cache = new Map<string, string>();
@@ -135,10 +136,10 @@ export function MoleculeInsights({
             <p className="text-xs" style={{ color: "#c0492e" }}>
               {error}
             </p>
+          ) : text ? (
+            <AiMarkdown text={text} />
           ) : (
-            <p className="whitespace-pre-line text-sm leading-relaxed text-ink">
-              {text || "…"}
-            </p>
+            <p className="text-sm text-ink-3">…</p>
           )}
           <p className="mt-2 text-[10px] leading-tight text-ink-3">
             General educational info, AI-generated — not a safety data sheet.

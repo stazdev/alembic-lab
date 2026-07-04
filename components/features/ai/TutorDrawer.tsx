@@ -13,6 +13,7 @@ import { ArrowUp, Eraser, Sparkles, Square, X } from "lucide-react";
 import { useAi, hasAi } from "@/lib/stores/aiStore";
 import { streamGenerate, GeminiError } from "@/lib/ai/gemini";
 import { TUTOR_SYSTEM, pageContext, renderContext } from "@/lib/ai/context";
+import { AiMarkdown } from "./AiMarkdown";
 import { cn } from "@/lib/utils";
 
 interface Msg {
@@ -220,13 +221,19 @@ export function TutorDrawer({ open, onClose }: { open: boolean; onClose: () => v
                   >
                     <div
                       className={cn(
-                        "max-w-[85%] whitespace-pre-line rounded-card px-3.5 py-2.5 text-sm leading-relaxed",
+                        "max-w-[85%] rounded-card px-3.5 py-2.5 text-sm leading-relaxed",
                         m.role === "user"
-                          ? "bg-ink text-on-dark"
+                          ? "whitespace-pre-line bg-ink text-on-dark"
                           : "border border-line bg-surface-2 text-ink",
                       )}
                     >
-                      {m.text || (streaming ? "…" : "")}
+                      {m.role === "user" ? (
+                        m.text
+                      ) : m.text ? (
+                        <AiMarkdown text={m.text} />
+                      ) : (
+                        streaming && <span className="text-ink-3">…</span>
+                      )}
                     </div>
                   </div>
                 ))}
