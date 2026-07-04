@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useState, type ReactNode } from "react";
-import { RotateCcw, Sparkles, Trash2 } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, RotateCcw, Sparkles, Trash2, X } from "lucide-react";
 import { usePrefs } from "@/lib/stores/prefsStore";
 import { useTasks } from "@/lib/stores/tasksStore";
 import { useTour } from "@/lib/stores/tourStore";
 import { usePractice } from "@/lib/stores/practiceStore";
+import { useAi, AI_MODELS } from "@/lib/stores/aiStore";
+import { validateKey } from "@/lib/ai/gemini";
 import { TASKS } from "@/data/tasks";
 import { ELEMENTS } from "@/data/elements";
 import { REAGENTS } from "@/lib/chemistry/reagents";
 import { MOLECULE_LIBRARY } from "@/data/moleculeLibrary";
+import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
+
+const OK = "#3f8f5a";
+const ERR = "#c0492e";
 
 const STACK = [
   "Next.js",
@@ -135,16 +141,35 @@ export function SettingsView() {
   const toursSeen = useTour((s) => s.seen);
   const resetTours = useTour((s) => s.resetSeen);
   const resetPractice = usePractice((s) => s.reset);
+  const apiKey = useAi((s) => s.apiKey);
+  const model = useAi((s) => s.model);
+  const aiEnabled = useAi((s) => s.enabled);
+  const setApiKey = useAi((s) => s.setApiKey);
+  const setModel = useAi((s) => s.setModel);
+  const setAiEnabled = useAi((s) => s.setEnabled);
+  const resetAi = useAi((s) => s.reset);
   const [confirmTasks, setConfirmTasks] = useState(false);
   const [confirmAll, setConfirmAll] = useState(false);
+  const [showKey, setShowKey] = useState(false);
+  const [test, setTest] = useState<{ status: "idle" | "testing" | "ok" | "error"; msg?: string }>({
+    status: "idle",
+  });
 
   const done = mounted ? completed.length : 0;
   const seenTours = mounted ? toursSeen.length : 0;
+  const keyValue = mounted ? apiKey : "";
+
+  async function testKey() {
+    setTest({ status: "testing" });
+    const r = await validateKey(apiKey.trim(), model);
+    setTest(r.ok ? { status: "ok" } : { status: "error", msg: r.error });
+  }
 
   function clearAll() {
     resetTasks();
     resetTours();
     resetPractice();
+    resetAi();
     setDisplayName("");
     setTitle("");
     setReduceMotion(false);
@@ -194,6 +219,130 @@ export function SettingsView() {
           Alembic also honours your system &ldquo;reduce motion&rdquo; setting
           automatically.
         </p>
+      </section>
+
+      {/* AI assistant */}
+      <section className="rounded-card border border-line bg-surface p-5">
+        <div className="flex items-center justify-between gap-4">
+          <h2 className="text-base font-semibold text-ink">AI assistant</h2>
+          <Switch
+            checked={mounted && aiEnabled}
+            onChange={setAiEnabled}
+            label="Enable AI features"
+          />
+        </div>
+        <p className="mt-1 text-xs leading-relaxed text-ink-2">
+          Optional. Bring your own Google Gemini API key to unlock the tutor
+          chat, explanations, practice hints, and molecule insights. Your key is
+          stored <span className="font-medium text-ink">only in this browser</span>{" "}
+          and sent directly to Google when you use an AI feature — never to
+          Alembic (there is no server). Treat it like a password; don&rsquo;t use
+          a shared computer.
+        </p>
+
+        {/* Key */}
+        <div className="mt-4">
+          <label className="mb-1 block text-xs font-medium text-ink-2">
+            Gemini API key
+          </label>
+          <div className="flex items-center gap-2">
+            <div className="flex flex-1 items-center rounded-ctrl border border-line bg-surface px-3 transition focus-within:border-ink-2">
+              <input
+                type={showKey ? "text" : "password"}
+                value={keyValue}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  setTest({ status: "idle" });
+                }}
+                placeholder="Paste your Gemini API key"
+                autoComplete="off"
+                spellCheck={false}
+                aria-label="Gemini API key"
+                className="h-11 w-full bg-transparent text-sm text-ink placeholder:text-ink-3 focus:outline-none"
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey((v) => !v)}
+                aria-label={showKey ? "Hide key" : "Show key"}
+                className="ml-2 shrink-0 text-ink-3 transition hover:text-ink"
+              >
+                {showKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
+            <Button
+              variant="soft"
+              size="sm"
+              onClick={testKey}
+              disabled={!keyValue.trim() || test.status === "testing"}
+            >
+              {test.status === "testing" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Test"
+              )}
+            </Button>
+          </div>
+          {test.status === "ok" && (
+            <p className="mt-1.5 inline-flex items-center gap-1 text-xs" style={{ color: OK }}>
+              <Check className="h-3.5 w-3.5" /> Key works.
+            </p>
+          )}
+          {test.status === "error" && (
+            <p className="mt-1.5 inline-flex items-center gap-1 text-xs" style={{ color: ERR }}>
+              <X className="h-3.5 w-3.5" /> {test.msg}
+            </p>
+          )}
+          <div className="mt-2 flex items-center gap-3">
+            <a
+              href="https://aistudio.google.com/apikey"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-ink-2 underline transition hover:text-ink"
+            >
+              Get a key
+            </a>
+            {mounted && apiKey && (
+              <button
+                type="button"
+                onClick={() => {
+                  setApiKey("");
+                  setTest({ status: "idle" });
+                }}
+                className="text-xs text-ink-2 transition hover:text-ink"
+              >
+                Remove key
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Model */}
+        <div className="mt-4">
+          <label className="mb-1.5 block text-xs font-medium text-ink-2">Model</label>
+          <div className="flex flex-wrap gap-1.5">
+            {AI_MODELS.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setModel(m.id)}
+                aria-pressed={mounted && model === m.id}
+                title={m.note}
+                className={cn(
+                  "rounded-pill px-3 py-1.5 text-xs font-medium transition",
+                  mounted && model === m.id
+                    ? "bg-ink text-on-dark"
+                    : "border border-line bg-surface text-ink-2 hover:text-ink",
+                )}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+          <p className="mt-2 text-[11px] text-ink-3">
+            2.5 Flash is fast and free-tier friendly. Newer models may need to be
+            enabled on your key.
+          </p>
+        </div>
       </section>
 
       {/* Data & storage */}
