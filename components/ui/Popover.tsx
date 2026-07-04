@@ -29,7 +29,7 @@ export function PopoverContent({
         sideOffset={10}
         collisionPadding={16}
         className={cn(
-          "z-50 w-80 origin-[var(--radix-popover-content-transform-origin)] animate-pop-in rounded-card border border-line bg-surface p-5 shadow-lift",
+          "z-50 w-80 origin-(--radix-popover-content-transform-origin) animate-pop-in rounded-card border border-line bg-surface p-5 shadow-lift",
           className,
         )}
       >

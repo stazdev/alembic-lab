@@ -6,6 +6,7 @@ import "katex/dist/katex.min.css";
 import { TooltipProvider } from "@/components/ui/Tooltip";
 import { TopBar } from "@/components/shell/TopBar";
 import { PrefsEffect } from "@/components/shell/PrefsEffect";
+import { TourOverlay } from "@/components/shell/TourOverlay";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -31,6 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <TopBar />
             {children}
           </div>
+          <TourOverlay />
         </TooltipProvider>
       </body>
     </html>

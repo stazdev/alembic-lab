@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import type { Task } from "@/data/tasks";
 import { useTasks } from "@/lib/stores/tasksStore";
+import { useMounted } from "@/lib/hooks/useMounted";
 import { Pill } from "@/components/ui/Pill";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +16,10 @@ export function TaskCard({
   active: boolean;
   onSelect: () => void;
 }) {
-  const completed = useTasks((s) => s.isComplete(task.id));
+  // Gate the persisted read so SSR and first client render agree (no checkmark
+  // flash / hydration mismatch); the real state appears after mount.
+  const mounted = useMounted();
+  const completed = useTasks((s) => s.isComplete(task.id)) && mounted;
   return (
     <button
       type="button"

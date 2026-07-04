@@ -59,7 +59,7 @@ export function DashboardView() {
   return (
     <div className="mt-8 space-y-8">
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div data-tour="dashboard-stats" className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile value={`${done}/${total}`} label="Tasks complete" />
         <StatTile value={String(ELEMENTS.length)} label="Elements" />
         <StatTile value={String(REAGENTS.length)} label="Reagents & metals" />
@@ -68,7 +68,7 @@ export function DashboardView() {
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.4fr]">
         {/* Progress */}
-        <div className="rounded-card border border-line bg-surface p-5">
+        <div data-tour="dashboard-progress" className="rounded-card border border-line bg-surface p-5">
           <div className="flex items-baseline justify-between">
             <h2 className="text-base font-semibold text-ink">Task progress</h2>
             <span className="text-sm font-semibold tabular-nums text-ink">{pct}%</span>
@@ -106,7 +106,7 @@ export function DashboardView() {
         </div>
 
         {/* Explore */}
-        <div>
+        <div data-tour="dashboard-modules">
           <h2 className="mb-3 text-base font-semibold text-ink">Explore the lab</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {MODULES.map((m) => (

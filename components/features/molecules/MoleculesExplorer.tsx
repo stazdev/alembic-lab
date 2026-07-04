@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { MOLECULE_LIBRARY } from "@/data/moleculeLibrary";
 import { FormulaText } from "@/components/chem/FormulaText";
+import { PropertyCard } from "@/components/chem/PropertyCard";
+import { MoleculeInsights } from "@/components/features/ai/MoleculeInsights";
 import { SearchField } from "@/components/ui/SearchField";
 import { cn } from "@/lib/utils";
 import { MoleculeViewer } from "./MoleculeViewer";
@@ -36,6 +38,7 @@ export function MoleculesExplorer() {
             if (q) setActive({ name: q, label: q });
           }}
           className="mb-4"
+          data-tour="molecules-search"
         >
           <SearchField
             value={query}
@@ -44,7 +47,7 @@ export function MoleculesExplorer() {
           />
         </form>
 
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <div data-tour="molecules-library" className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {MOLECULE_LIBRARY.map((m) => {
             const isActive = active.moleculeKey === m.key;
             return (
@@ -78,7 +81,7 @@ export function MoleculesExplorer() {
       </div>
 
       {/* Viewer */}
-      <div>
+      <div data-tour="molecules-viewer">
         <div className="mb-3">
           <div className="text-lg font-semibold text-ink">{active.label}</div>
           {active.formula && (
@@ -94,6 +97,19 @@ export function MoleculesExplorer() {
           cid={active.cid}
           smiles={active.smiles}
         />
+        {active.smiles && (
+          <div className="mt-3">
+            <PropertyCard smiles={active.smiles} />
+          </div>
+        )}
+        <div className="mt-3">
+          <MoleculeInsights
+            key={active.moleculeKey ?? active.name}
+            name={active.label}
+            formula={active.formula}
+            smiles={active.smiles}
+          />
+        </div>
       </div>
     </div>
   );

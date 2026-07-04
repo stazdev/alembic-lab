@@ -7,6 +7,7 @@ import { useSandbox } from "@/lib/stores/sandboxStore";
 import { VesselCard } from "./VesselCard";
 import { ReagentShelf } from "./ReagentShelf";
 import { ObservationLog } from "./ObservationLog";
+import { SandboxAi } from "./SandboxAi";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { BenchIO } from "./BenchIO";
@@ -58,7 +59,7 @@ export function SandboxView() {
             computed from the mixture — watch the Observations panel.
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div data-tour="sandbox-actions" className="flex items-center gap-2">
           <BenchIO />
           <Button variant="soft" size="sm" onClick={resetAll}>
             <RotateCcw className="h-4 w-4" />
@@ -87,10 +88,11 @@ export function SandboxView() {
       {/* Main layout */}
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[1fr_340px]">
         {/* Bench */}
+        <div data-tour="sandbox-bench">
         <Card tone="cream" className="p-5">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <h2 className="text-base font-semibold text-ink">The Bench</h2>
-            <div className="flex flex-wrap items-center gap-1.5">
+            <div data-tour="sandbox-vessels" className="flex flex-wrap items-center gap-1.5">
               <span className="mr-1 text-xs text-ink-3">Add vessel:</span>
               {VESSEL_OPTIONS.map((option) => (
                 <Button
@@ -122,12 +124,20 @@ export function SandboxView() {
               ))}
             </div>
           )}
+          <div className="mt-3">
+            <SandboxAi />
+          </div>
         </Card>
+        </div>
 
         {/* Right rail */}
         <div className="flex flex-col gap-6">
-          <ReagentShelf />
-          <ObservationLog />
+          <div data-tour="sandbox-shelf">
+            <ReagentShelf />
+          </div>
+          <div data-tour="sandbox-log">
+            <ObservationLog />
+          </div>
         </div>
       </div>
     </div>

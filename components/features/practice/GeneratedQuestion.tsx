@@ -1,0 +1,200 @@
+"use client";
+
+/**
+ * Presentational renderer for one generated question. Stateless about mastery —
+ * it reports the first grade up via onGraded and lets the parent drive what
+ * comes next. Mirrors the guided-task look without the tasks store.
+ */
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowRight, Check, Lightbulb, MessageCircleQuestion, X } from "lucide-react";
+import type { GeneratedTask } from "@/lib/chemistry/generators/types";
+import { AiActionButton } from "@/components/features/ai/AiActionButton";
+import { explainSolutionPrompt, hintPrompt } from "@/lib/ai/context";
+import { Button } from "@/components/ui/Button";
+import { Field } from "@/components/ui/Field";
+import { cn } from "@/lib/utils";
+
+const OK = "#3f8f5a";
+const ERR = "#c0492e";
+
+export function GeneratedQuestion({
+  task,
+  onGraded,
+}: {
+  task: GeneratedTask;
+  onGraded?: (correct: boolean) => void;
+}) {
+  const [numeric, setNumeric] = useState("");
+  const [selected, setSelected] = useState<number | null>(null);
+  const [revealed, setRevealed] = useState(0);
+  const [result, setResult] = useState<boolean | null>(null);
+  const [showSolution, setShowSolution] = useState(false);
+  const [graded, setGraded] = useState(false);
+
+  const canCheck =
+    task.answer.kind === "numeric" ? numeric.trim() !== "" : selected !== null;
+
+  function check() {
+    let correct = false;
+    if (task.answer.kind === "numeric") {
+      const v = parseFloat(numeric);
+      correct =
+        Number.isFinite(v) && Math.abs(v - task.answer.value) <= task.answer.tolerance;
+    } else {
+      correct = selected === task.answer.correctIndex;
+    }
+    setResult(correct);
+    // Record only the first grade for this question, so mastery reflects one
+    // attempt per generated instance.
+    if (!graded) {
+      setGraded(true);
+      onGraded?.(correct);
+    }
+  }
+
+  return (
+    <div>
+      {task.given && task.given.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {task.given.map((g) => (
+            <span
+              key={g.label}
+              className="rounded-pill bg-surface-2 px-3 py-1 text-xs text-ink-2"
+            >
+              {g.label} = <span className="font-medium text-ink">{g.value}</span>
+            </span>
+          ))}
+        </div>
+      )}
+
+      <p className="mt-3 whitespace-pre-line rounded-ctrl bg-surface-2 p-4 text-sm leading-relaxed text-ink">
+        {task.prompt}
+      </p>
+
+      {/* Answer */}
+      {task.answer.kind === "numeric" ? (
+        <Field
+          label="Your answer"
+          value={numeric}
+          onChange={(v) => {
+            setNumeric(v);
+            setResult(null);
+          }}
+          unit={task.answer.unit || undefined}
+          inputMode="decimal"
+          className="mt-4 max-w-48"
+        />
+      ) : (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {task.answer.options.map((opt, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                setSelected(i);
+                setResult(null);
+              }}
+              className={cn(
+                "rounded-pill border px-4 py-2 text-sm font-medium transition",
+                selected === i
+                  ? "border-ink bg-ink text-on-dark"
+                  : "border-line bg-surface text-ink hover:border-line-strong",
+              )}
+            >
+              {opt}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button variant="accent" size="sm" onClick={check} disabled={!canCheck}>
+          Check answer
+        </Button>
+        {result === true && (
+          <span
+            className="inline-flex items-center gap-1 text-sm font-medium"
+            style={{ color: OK }}
+          >
+            <Check className="h-4 w-4" /> Correct!
+          </span>
+        )}
+        {result === false && (
+          <span
+            className="inline-flex items-center gap-1 text-sm font-medium"
+            style={{ color: ERR }}
+          >
+            <X className="h-4 w-4" /> Not quite — try a hint or the solution.
+          </span>
+        )}
+      </div>
+
+      {/* Hints */}
+      <div className="mt-5 border-t border-line pt-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium text-ink-3">
+            Hints ({revealed}/{task.hints.length})
+          </span>
+          {revealed < task.hints.length && (
+            <Button variant="soft" size="sm" onClick={() => setRevealed((r) => r + 1)}>
+              <Lightbulb className="h-4 w-4" />
+              {revealed === 0 ? "Hint" : "Next hint"}
+            </Button>
+          )}
+        </div>
+        {revealed > 0 && (
+          <ol className="mt-3 space-y-2">
+            {task.hints.slice(0, revealed).map((h, i) => (
+              <li
+                key={i}
+                className="flex gap-2 rounded-ctrl bg-surface-2 p-3 text-sm text-ink-2"
+              >
+                <span className="font-semibold text-ink">{i + 1}.</span>
+                {h}
+              </li>
+            ))}
+          </ol>
+        )}
+        <AiActionButton
+          {...hintPrompt(task)}
+          label="Ask the tutor for a hint"
+          icon={<MessageCircleQuestion className="h-3.5 w-3.5" />}
+          maxOutputTokens={400}
+          className="mt-3"
+        />
+      </div>
+
+      {/* Solution */}
+      <div className="mt-4">
+        {!showSolution ? (
+          <Button variant="outline" size="sm" onClick={() => setShowSolution(true)}>
+            Show solution
+          </Button>
+        ) : (
+          <div className="rounded-ctrl border border-line bg-surface-2 p-4">
+            <div className="mb-1 text-xs font-medium text-ink-3">Solution</div>
+            <p className="whitespace-pre-line text-sm leading-relaxed text-ink">
+              {task.solution}
+            </p>
+            <AiActionButton
+              {...explainSolutionPrompt(task)}
+              label="Explain this solution"
+              maxOutputTokens={1500}
+              className="mt-3"
+            />
+          </div>
+        )}
+      </div>
+
+      {task.toolHref && (
+        <Link
+          href={task.toolHref}
+          className="mt-4 inline-flex items-center gap-1 text-xs font-medium text-ink-2 transition hover:text-ink"
+        >
+          Open the matching calculator <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      )}
+    </div>
+  );
+}

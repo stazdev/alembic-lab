@@ -98,38 +98,38 @@ export const ELEMENT_PROPERTIES: Record<number, ElementProperties> = {
   82:  { electronegativity: 2.33, atomicRadius: 146,  ionizationEnergy: 715.6,  meltingPoint: 600.61,  boilingPoint: 2022,   density: 11.34,  standardState: "solid" },   // Pb
   83:  { electronegativity: 2.02, atomicRadius: 148,  ionizationEnergy: 703,    meltingPoint: 544.55,  boilingPoint: 1837,   density: 9.78,   standardState: "solid" },   // Bi
   84:  { electronegativity: 2.00, atomicRadius: 140,  ionizationEnergy: 812.1,  meltingPoint: 527,     boilingPoint: 1235,   density: 9.20,   standardState: "solid" },   // Po
-  85:  { electronegativity: 2.20, atomicRadius: 150,  ionizationEnergy: 899,    meltingPoint: 575,     boilingPoint: 610,    density: null,   standardState: "solid" },   // At
+  85:  { electronegativity: 2.20, atomicRadius: 150,  ionizationEnergy: 899,    meltingPoint: 575,     boilingPoint: 610,    density: 8.92,   standardState: "solid" },   // At (density predicted)
   86:  { electronegativity: 2.20, atomicRadius: 150,  ionizationEnergy: 1037.1, meltingPoint: 202,     boilingPoint: 211.5,  density: null,   standardState: "gas" },     // Rn
-  87:  { electronegativity: 0.70, atomicRadius: 260,  ionizationEnergy: 393,    meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "solid" },   // Fr
+  87:  { electronegativity: 0.70, atomicRadius: 260,  ionizationEnergy: 393,    meltingPoint: 281,     boilingPoint: 890,    density: 2.48,   standardState: "solid" },   // Fr (density predicted)
   88:  { electronegativity: 0.90, atomicRadius: 221,  ionizationEnergy: 509.3,  meltingPoint: 973,     boilingPoint: 2010,   density: 5.5,    standardState: "solid" },   // Ra
   89:  { electronegativity: 1.10, atomicRadius: 215,  ionizationEnergy: 499,    meltingPoint: 1323,    boilingPoint: 3471,   density: 10.07,  standardState: "solid" },   // Ac
   90:  { electronegativity: 1.30, atomicRadius: 206,  ionizationEnergy: 587,    meltingPoint: 2023,    boilingPoint: 5061,   density: 11.72,  standardState: "solid" },   // Th
-  91:  { electronegativity: 1.50, atomicRadius: 200,  ionizationEnergy: 568,    meltingPoint: 1841,    boilingPoint: null,   density: 15.37,  standardState: "solid" },   // Pa
+  91:  { electronegativity: 1.50, atomicRadius: 200,  ionizationEnergy: 568,    meltingPoint: 1841,    boilingPoint: 4300,   density: 15.37,  standardState: "solid" },   // Pa
   92:  { electronegativity: 1.38, atomicRadius: 196,  ionizationEnergy: 597.6,  meltingPoint: 1405.3,  boilingPoint: 4404,   density: 19.05,  standardState: "solid" },   // U
   93:  { electronegativity: 1.36, atomicRadius: 190,  ionizationEnergy: 604.5,  meltingPoint: 917,     boilingPoint: 4273,   density: 20.45,  standardState: "solid" },   // Np
   94:  { electronegativity: 1.28, atomicRadius: 187,  ionizationEnergy: 584.7,  meltingPoint: 912.5,   boilingPoint: 3505,   density: 19.84,  standardState: "solid" },   // Pu
   95:  { electronegativity: 1.13, atomicRadius: 180,  ionizationEnergy: 578,    meltingPoint: 1449,    boilingPoint: 2880,   density: 12,     standardState: "solid" },   // Am
   96:  { electronegativity: 1.28, atomicRadius: 169,  ionizationEnergy: 581,    meltingPoint: 1613,    boilingPoint: 3383,   density: 13.51,  standardState: "solid" },   // Cm
-  97:  { electronegativity: 1.30, atomicRadius: null, ionizationEnergy: 601,    meltingPoint: 1259,    boilingPoint: null,   density: 14.78,  standardState: "solid" },   // Bk
-  98:  { electronegativity: 1.30, atomicRadius: null, ionizationEnergy: 608,    meltingPoint: 1173,    boilingPoint: null,   density: 15.1,   standardState: "solid" },   // Cf
-  99:  { electronegativity: 1.30, atomicRadius: null, ionizationEnergy: 619,    meltingPoint: 1133,    boilingPoint: null,   density: null,   standardState: "solid" },   // Es
-  100: { electronegativity: null, atomicRadius: null, ionizationEnergy: 627,    meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Fm
-  101: { electronegativity: null, atomicRadius: null, ionizationEnergy: 635,    meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Md
-  102: { electronegativity: null, atomicRadius: null, ionizationEnergy: 642,    meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // No
-  103: { electronegativity: null, atomicRadius: null, ionizationEnergy: 478.6,  meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Lr
-  104: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Rf
-  105: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Db
-  106: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Sg
-  107: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Bh
-  108: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Hs
-  109: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Mt
-  110: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Ds
-  111: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Rg
-  112: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Cn
-  113: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Nh
-  114: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Fl
-  115: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Mc
-  116: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Lv
-  117: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Ts
-  118: { electronegativity: null, atomicRadius: null, ionizationEnergy: null,   meltingPoint: null,    boilingPoint: null,   density: null,   standardState: "unknown" }, // Og
+  97:  { electronegativity: 1.30, atomicRadius: 168,  ionizationEnergy: 601,    meltingPoint: 1259,    boilingPoint: 2900,   density: 14.78,  standardState: "solid" },   // Bk (bp predicted)
+  98:  { electronegativity: 1.30, atomicRadius: 168,  ionizationEnergy: 608,    meltingPoint: 1173,    boilingPoint: 1743,   density: 15.1,   standardState: "solid" },   // Cf (bp predicted)
+  99:  { electronegativity: 1.30, atomicRadius: 165,  ionizationEnergy: 619,    meltingPoint: 1133,    boilingPoint: 1269,   density: 8.84,   standardState: "solid" },   // Es (bp, density predicted)
+  100: { electronegativity: 1.30, atomicRadius: 167,  ionizationEnergy: 627,    meltingPoint: 1800,    boilingPoint: null,   density: 9.7,    standardState: "solid" },   // Fm (predicted)
+  101: { electronegativity: 1.30, atomicRadius: 173,  ionizationEnergy: 635,    meltingPoint: 1100,    boilingPoint: null,   density: 10.3,   standardState: "solid" },   // Md (predicted)
+  102: { electronegativity: 1.30, atomicRadius: 176,  ionizationEnergy: 642,    meltingPoint: 1100,    boilingPoint: null,   density: 9.9,    standardState: "solid" },   // No (predicted)
+  103: { electronegativity: 1.30, atomicRadius: 161,  ionizationEnergy: 478.6,  meltingPoint: 1900,    boilingPoint: null,   density: 14.4,   standardState: "solid" },   // Lr (mp, density predicted)
+  104: { electronegativity: null, atomicRadius: 157,  ionizationEnergy: 579.9,  meltingPoint: 2400,    boilingPoint: 5800,   density: 17,     standardState: "solid" },   // Rf (predicted)
+  105: { electronegativity: null, atomicRadius: 149,  ionizationEnergy: 665.6,  meltingPoint: null,    boilingPoint: null,   density: 21.6,   standardState: "solid" },   // Db (predicted)
+  106: { electronegativity: null, atomicRadius: 143,  ionizationEnergy: 757.4,  meltingPoint: null,    boilingPoint: null,   density: 23.5,   standardState: "solid" },   // Sg (predicted)
+  107: { electronegativity: null, atomicRadius: 141,  ionizationEnergy: 740.5,  meltingPoint: null,    boilingPoint: null,   density: 26.5,   standardState: "solid" },   // Bh (predicted)
+  108: { electronegativity: null, atomicRadius: 134,  ionizationEnergy: 733.3,  meltingPoint: null,    boilingPoint: null,   density: 28,     standardState: "solid" },   // Hs (predicted)
+  109: { electronegativity: null, atomicRadius: 129,  ionizationEnergy: 799.8,  meltingPoint: null,    boilingPoint: null,   density: 27.5,   standardState: "solid" },   // Mt (predicted)
+  110: { electronegativity: null, atomicRadius: 128,  ionizationEnergy: 954.9,  meltingPoint: null,    boilingPoint: null,   density: 26.5,   standardState: "solid" },   // Ds (predicted)
+  111: { electronegativity: null, atomicRadius: 121,  ionizationEnergy: 1020,   meltingPoint: null,    boilingPoint: null,   density: 23,     standardState: "solid" },   // Rg (predicted)
+  112: { electronegativity: null, atomicRadius: 122,  ionizationEnergy: 1154.9, meltingPoint: 283,     boilingPoint: 340,    density: 14.0,   standardState: "liquid" },  // Cn (predicted)
+  113: { electronegativity: null, atomicRadius: 136,  ionizationEnergy: 704.9,  meltingPoint: 700,     boilingPoint: 1400,   density: 16,     standardState: "solid" },   // Nh (predicted)
+  114: { electronegativity: null, atomicRadius: 143,  ionizationEnergy: 823.9,  meltingPoint: 284,     boilingPoint: null,   density: 11.4,   standardState: "liquid" },  // Fl (predicted)
+  115: { electronegativity: null, atomicRadius: 162,  ionizationEnergy: 538.3,  meltingPoint: 700,     boilingPoint: 1400,   density: 13.5,   standardState: "solid" },   // Mc (predicted)
+  116: { electronegativity: null, atomicRadius: 175,  ionizationEnergy: 663.9,  meltingPoint: 700,     boilingPoint: 1100,   density: 12.9,   standardState: "solid" },   // Lv (predicted)
+  117: { electronegativity: null, atomicRadius: 165,  ionizationEnergy: 736.9,  meltingPoint: 700,     boilingPoint: 883,    density: 7.2,    standardState: "solid" },   // Ts (predicted)
+  118: { electronegativity: null, atomicRadius: 157,  ionizationEnergy: 860.7,  meltingPoint: 325,     boilingPoint: 450,    density: 7.0,    standardState: "solid" },   // Og (predicted)
 };

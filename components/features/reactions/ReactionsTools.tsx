@@ -131,7 +131,7 @@ export function ReactionsTools() {
 
   return (
     <div>
-      <div className="-mx-1 overflow-x-auto px-1 pb-1">
+      <div data-tour="reactions-categories" className="-mx-1 overflow-x-auto px-1 pb-1">
         <SegmentedControl
           layoutId="reactions-category"
           aria-label="Tool category"
@@ -142,7 +142,7 @@ export function ReactionsTools() {
       </div>
 
       {category.tools.length > 1 && (
-        <div className="mt-3 flex flex-wrap gap-1.5">
+        <div data-tour="reactions-tools" className="mt-3 flex flex-wrap gap-1.5">
           {category.tools.map((t) => (
             <button
               key={t.value}
@@ -162,7 +162,7 @@ export function ReactionsTools() {
         </div>
       )}
 
-      <div className="mt-6">{TOOL_COMPONENTS[activeTool]}</div>
+      <div data-tour="reactions-workspace" className="mt-6">{TOOL_COMPONENTS[activeTool]}</div>
     </div>
   );
 }

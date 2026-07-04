@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ScrollText } from "lucide-react";
 import { useSandbox, type Observation } from "@/lib/stores/sandboxStore";
 import { Card } from "@/components/ui/Card";
+import { AiActionButton } from "@/components/features/ai/AiActionButton";
+import { TUTOR_SYSTEM, renderContext } from "@/lib/ai/context";
 
 const KIND_COLOR: Record<Observation["kind"], string> = {
   precipitate: "#b9b4a4",
@@ -17,12 +19,40 @@ export function ObservationLog() {
   const observations = useSandbox((s) => s.observations);
   const ordered = [...observations].reverse();
 
+  const recent = observations.slice(-8);
+  const explain =
+    recent.length > 0
+      ? {
+          system: TUTOR_SYSTEM,
+          prompt:
+            renderContext({
+              page: "Sandbox bench",
+              note: "reacting reagents in vessels",
+              facts: recent.map((o, i) => ({
+                label: `Observation ${i + 1}`,
+                value: o.equation ? `${o.text} [${o.equation}]` : o.text,
+              })),
+            }) +
+            "\n\nExplain the chemistry behind what the student just observed — which reactions occurred and why they produce these effects. Be brief.",
+        }
+      : null;
+
   return (
     <Card className="flex flex-col p-5">
       <div className="mb-3 flex items-center gap-2">
         <ScrollText className="h-4 w-4 text-ink-2" />
         <h2 className="text-base font-semibold text-ink">Observations</h2>
       </div>
+
+      {explain && (
+        <AiActionButton
+          label="Explain what happened"
+          system={explain.system}
+          prompt={explain.prompt}
+          maxOutputTokens={1000}
+          className="mb-3"
+        />
+      )}
 
       {ordered.length === 0 ? (
         <p className="py-6 text-center text-xs text-ink-3">
